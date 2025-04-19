@@ -22,7 +22,6 @@ const AcademicRecords = () => {
 
   const modalRef = useRef(null);
 
-  // Fetch students from Supabase
   useEffect(() => {
     const fetchStudents = async () => {
       try {
@@ -77,7 +76,6 @@ const AcademicRecords = () => {
     } = formData;
 
     if (selectedStudent) {
-      // Update student in Supabase
       try {
         const { error } = await supabase
           .from("StudentData")
@@ -105,7 +103,6 @@ const AcademicRecords = () => {
         console.error("Unexpected error:", err);
       }
     } else {
-      // Insert new student into Supabase
       try {
         const { error } = await supabase.from("StudentData").insert([
           {

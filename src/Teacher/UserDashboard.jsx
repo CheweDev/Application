@@ -14,14 +14,14 @@ const UserDashboard = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch students and requests based on teacher's grade_level and section
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const gradeLevel = sessionStorage.getItem('grade_level');
         const section = sessionStorage.getItem('section');
 
-        // Fetch students
+
         const { data: studentData, error: studentError } = await supabase
           .from("StudentData")
           .select("*")
@@ -34,7 +34,7 @@ const UserDashboard = () => {
           setStudents(studentData);
         }
 
-        // Fetch requests
+
         const { data: requestData, error: requestError } = await supabase
           .from("Request")
           .select("*")
@@ -56,12 +56,11 @@ const UserDashboard = () => {
     fetchData();
   }, []);
 
-  // Extract unique values for filters
   const uniqueGradeLevels = [...new Set(students.map((item) => item.gradeLevel))];
   const uniqueSections = [...new Set(students.map((item) => item.section))];
   const uniqueStatuses = ["Pending", "Approved", "Declined"];
 
-  // Combine student and request data
+
   const combinedData = students.map(student => {
     const studentRequest = requests.find(request => request.student_id === student.lrn);
     return {
@@ -73,7 +72,7 @@ const UserDashboard = () => {
     };
   });
 
-  // Apply filters to data
+
   const filteredData = combinedData.filter((item) => {
     const matchGradeLevel =
       filters.gradeLevel === "All" || item.gradeLevel === filters.gradeLevel;
@@ -84,7 +83,7 @@ const UserDashboard = () => {
     return matchGradeLevel && matchSection && matchStatus;
   });
 
-  // Calculate summary data
+
   const totalStudents = filteredData.length;
   const sections = new Set(filteredData.map((item) => item.section));
   const totalSections = sections.size;

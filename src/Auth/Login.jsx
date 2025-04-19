@@ -39,7 +39,7 @@ const Login = () => {
         }
         console.log("Login successful:", data);
 
-        // Store grade_level and section in sessionStorage
+    
         sessionStorage.setItem('grade_level', data[0].grade_level || '');
         sessionStorage.setItem('section', data[0].section || '');
 

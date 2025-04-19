@@ -15,11 +15,11 @@ const AdminDashboard = () => {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch all data from Supabase
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch all students
+
         const { data: studentData, error: studentError } = await supabase
           .from("StudentData")
           .select("*");
@@ -30,7 +30,7 @@ const AdminDashboard = () => {
           setStudents(studentData);
         }
 
-        // Fetch all requests
+
         const { data: requestData, error: requestError } = await supabase
           .from("Request")
           .select("*");
@@ -41,7 +41,6 @@ const AdminDashboard = () => {
           setRequests(requestData);
         }
 
-        // Fetch all teachers
         const { data: teacherData, error: teacherError } = await supabase
           .from("TeacherData")
           .select("*");
@@ -61,7 +60,7 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
-  // Combine student and request data
+
   const combinedData = requests.map(request => {
     const student = students.find(s => s.lrn === request.student_id);
     return {

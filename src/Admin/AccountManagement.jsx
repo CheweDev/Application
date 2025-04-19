@@ -10,7 +10,7 @@ const UserManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const modalRef = useRef(null);
 
-  // Fetch users from Supabase
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {

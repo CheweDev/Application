@@ -13,7 +13,7 @@ const RequestManagement = () => {
   const modalRef = useRef(null);
   const acceptedModalRef = useRef(null);
 
-  // Fetch requests from Supabase
+
   useEffect(() => {
     const fetchRequests = async () => {
       try {
@@ -57,7 +57,7 @@ const RequestManagement = () => {
       if (error) {
         console.error("Error updating request:", error);
       } else {
-        // Refresh requests list
+ 
         const { data: updatedRequests, error: fetchError } = await supabase
           .from("Request")
           .select("*")
@@ -87,7 +87,7 @@ const RequestManagement = () => {
       if (error) {
         console.error("Error updating request:", error);
       } else {
-        // Refresh requests list
+
         const { data: updatedRequests, error: fetchError } = await supabase
           .from("Request")
           .select("*")
@@ -123,7 +123,7 @@ const RequestManagement = () => {
     XLSX.writeFile(wb, "request_management.xlsx");
   };
 
-  // Filter data based on the active tab and search query
+
   const filteredData = requests
     .filter((item) => item.status.toLowerCase() === activeTab)
     .filter((item) =>

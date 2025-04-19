@@ -9,14 +9,13 @@ const Request = () => {
   const [selectedStudents, setSelectedStudents] = useState([]);
   const modalRef = useRef(null);
 
-  // Fetch students and requests based on teacher's grade_level and section
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const gradeLevel = sessionStorage.getItem('grade_level');
         const section = sessionStorage.getItem('section');
 
-        // Fetch students
         const { data: studentData, error: studentError } = await supabase
           .from("StudentData")
           .select("*")
@@ -29,7 +28,7 @@ const Request = () => {
           setStudents(studentData);
         }
 
-        // Fetch requests
+
         const { data: requestData, error: requestError } = await supabase
           .from("Request")
           .select("*")
@@ -61,7 +60,7 @@ const Request = () => {
       const currentYear = new Date().getFullYear();
       const schoolYear = `${currentYear}-${currentYear + 1}`;
 
-      // Create requests for selected students
+
       const newRequests = selectedStudents.map(student => ({
         student_id: student.lrn,
         student_name: `${student.first_name} ${student.last_name}`,
@@ -79,7 +78,7 @@ const Request = () => {
       if (error) {
         console.error("Error adding requests:", error);
       } else {
-        // Refresh requests list
+  
         const { data: updatedRequests, error: fetchError } = await supabase
           .from("Request")
           .select("*")

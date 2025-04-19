@@ -4,7 +4,7 @@ import AdminSidebar from "./AdminSidebar";
 import { IoArrowBack } from "react-icons/io5";
 import supabase from "../Supabase";
 import { IoMdPrint } from "react-icons/io";
-import CryptoJS from "crypto-js"; // Import crypto-js
+import CryptoJS from "crypto-js"; 
 
 const quarters = ["1st Quarter", "2nd Quarter", "3rd Quarter", "4th Quarter"];
 
@@ -48,7 +48,7 @@ const StudentGrade = () => {
   });
   const [selectedCard, setSelectedCard] = useState(null);
 
-  // Fetch grades from Supabase
+
   useEffect(() => {
     const fetchGrades = async () => {
       try {
@@ -61,7 +61,7 @@ const StudentGrade = () => {
         if (error) {
           console.error("Error fetching grades:", error);
         } else {
-          // Decrypt grades before setting them
+      
           const decryptedGrades = data.map((grade) => {
             const decryptedGrade = { ...grade };
             Object.keys(decryptedGrade).forEach((key) => {
@@ -111,7 +111,7 @@ const StudentGrade = () => {
     if (quarter) {
       const selected = grades.find((g) => g.quarter === quarter);
       if (selected) {
-        setFormData(selected); // Populate formData with the selected grade's data
+        setFormData(selected); 
       } else {
         setFormData({
           lrn: lrn || "",
@@ -165,7 +165,7 @@ const StudentGrade = () => {
 
   const handleSubmit = async () => {
     try {
-      // Encrypt formData before sending to Supabase
+
       const encryptedFormData = { ...formData };
       Object.keys(encryptedFormData).forEach((key) => {
         if (
@@ -193,7 +193,7 @@ const StudentGrade = () => {
       });
 
       if (formData.id) {
-        // Update existing grade using the id
+
         const { error } = await supabase
           .from("Grades")
           .update(encryptedFormData)
@@ -202,7 +202,7 @@ const StudentGrade = () => {
         if (error) {
           console.error("Error updating grade:", error);
         } else {
-          // Refresh the grades list after successful update
+
           const { data: updatedGrades, error: fetchError } = await supabase
             .from("Grades")
             .select("*")
@@ -245,7 +245,7 @@ const StudentGrade = () => {
           }
         }
       } else {
-        // Insert new grade
+
         const { error } = await supabase.from("Grades").insert([encryptedFormData]);
 
         if (error) {

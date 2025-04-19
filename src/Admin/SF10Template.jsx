@@ -166,7 +166,7 @@ const SF10Template = () => {
               });
             });
 
-            // Calculate final rating and remarks for each subject
+
             Object.entries(record.grades).forEach(([subject, grades]) => {
               const quarters = [grades.q1, grades.q2, grades.q3, grades.q4];
               const validGrades = quarters.filter(grade => grade !== "" && !isNaN(grade));

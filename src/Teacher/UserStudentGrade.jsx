@@ -46,7 +46,7 @@ const UserStudentGrade = () => {
   });
   const [selectedCard, setSelectedCard] = useState(null);
 
-  // Fetch grades from Supabase
+
   useEffect(() => {
     const fetchGrades = async () => {
       try {
@@ -59,7 +59,7 @@ const UserStudentGrade = () => {
         if (error) {
           console.error("Error fetching grades:", error);
         } else {
-          // Decrypt grades before setting them
+
           const decryptedGrades = data.map((grade) => {
             const decryptedGrade = { ...grade };
             Object.keys(decryptedGrade).forEach((key) => {
@@ -163,7 +163,7 @@ const UserStudentGrade = () => {
 
   const handleSubmit = async () => {
     try {
-      // Encrypt formData before sending to Supabase
+
       const encryptedFormData = { ...formData };
       Object.keys(encryptedFormData).forEach((key) => {
         if (
@@ -191,7 +191,7 @@ const UserStudentGrade = () => {
       });
 
       if (formData.id) {
-        // Update existing grade using the id
+
         const { error } = await supabase
           .from("Grades")
           .update(encryptedFormData)
@@ -200,7 +200,7 @@ const UserStudentGrade = () => {
         if (error) {
           console.error("Error updating grade:", error);
         } else {
-          // Refresh the grades list after successful update
+
           const { data: updatedGrades, error: fetchError } = await supabase
             .from("Grades")
             .select("*")
@@ -243,7 +243,7 @@ const UserStudentGrade = () => {
           }
         }
       } else {
-        // Insert new grade
+
         const { error } = await supabase.from("Grades").insert([encryptedFormData]);
 
         if (error) {
