@@ -1,24 +1,51 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaUserPlus } from "react-icons/fa";
+import supabase from "../Supabase";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [name, setFullName] = useState("");
+  const [grade_level, setGradeLevel] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("TEACHER");
 
   const location = useLocation();
   const navigate = useNavigate();
   const isLoginPage = location.pathname === "/";
   const isRegisterPage = location.pathname === "/register";
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate registration
-    setTimeout(() => {
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
       setIsLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.from("Users").insert([
+        { name, grade_level, email, password, role },
+      ]);
+
+      if (error) {
+        console.error("Error inserting data:", error);
+        openModal();
+      } else {
+        console.log("Data inserted successfully:", data);
+        navigate("/");
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
       openModal();
-    }, 2000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const openModal = () => {
@@ -96,13 +123,37 @@ const Register = () => {
           <form className="mt-6" onSubmit={handleSubmit}>
             <div className="mb-3">
               <label className="input validator w-full">
-                <input type="text" placeholder="Full Name" required />
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  value={name}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
               </label>
             </div>
 
             <div className="mb-3">
               <label className="input validator w-full">
-                <input type="email" placeholder="example@gmail.com" required />
+                <input
+                  type="text"
+                  placeholder="Grade Level - Ex. Grade 1"
+                  value={grade_level}
+                  onChange={(e) => setGradeLevel(e.target.value)}
+                  required
+                />
+              </label>
+            </div>
+
+            <div className="mb-3">
+              <label className="input validator w-full">
+                <input
+                  type="email"
+                  placeholder="example@gmail.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </label>
               <div className="validator-hint hidden">
                 Enter valid email address
@@ -114,6 +165,8 @@ const Register = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </label>
@@ -124,6 +177,8 @@ const Register = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                 />
               </label>
@@ -143,6 +198,8 @@ const Register = () => {
             <div className="flex flex-col sm:flex-row items-center w-full space-y-4 sm:space-y-0 sm:space-x-4">
               <select
                 className="select w-full sm:w-1/3 md:w-1/2 px-4 py-2 rounded-md border border-gray-300"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
                 required
               >
                 <option value="TEACHER">Teacher</option>

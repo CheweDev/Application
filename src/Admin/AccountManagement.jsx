@@ -1,62 +1,60 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar.jsx";
 import * as XLSX from "xlsx";
+import supabase from "../Supabase.jsx";
 
 const UserManagement = () => {
-  const [usersData, setUsersData] = useState([
-    {
-      id: 1,
-      name: "Avery Thompson",
-      email: "avery@example.com",
-      password: "password123",
-      status: "Active",
-      createdAt: "04/17/2025",
-    },
-    {
-      id: 2,
-      name: "Lucas Ramirez",
-      email: "lucas@example.com",
-      password: "password456",
-      status: "Blocked",
-      createdAt: "04/17/2025",
-    },
-    {
-      id: 3,
-      name: "Samantha Blake",
-      email: "samantha@example.com",
-      password: "password789",
-      status: "Active",
-      createdAt: "04/17/2025",
-    },
-    {
-      id: 4,
-      name: "Natalie Cruz",
-      email: "natalie@example.com",
-      password: "password000",
-      status: "Active",
-      createdAt: "04/15/2025",
-    },
-  ]);
+  const [usersData, setUsersData] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const modalRef = useRef(null);
+
+  // Fetch users from Supabase
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const { data, error } = await supabase.from("Users").select("*");
+        if (error) {
+          console.error("Error fetching users:", error);
+        } else {
+          setUsersData(data);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const openModal = (user) => {
     setSelectedUser(user);
     modalRef.current?.showModal();
   };
 
-  const handleBlockUnblockUser = (action) => {
-    // Update user status in the usersData array
-    const updatedUsersData = usersData.map((user) =>
-      user.id === selectedUser.id
-        ? { ...user, status: action === "block" ? "Blocked" : "Active" }
-        : user
-    );
-    setUsersData(updatedUsersData);
-    console.log(`${action} user: ${selectedUser.name}`);
-    modalRef.current.close();
-    setSelectedUser(null);
+  const handleBlockUnblockUser = async (action) => {
+    try {
+      const { error } = await supabase
+        .from("Users")
+        .update({ status: action === "block" ? "Blocked" : "Active" })
+        .eq("id", selectedUser.id);
+
+      if (error) {
+        console.error("Error updating user status:", error);
+      } else {
+        const updatedUsersData = usersData.map((user) =>
+          user.id === selectedUser.id
+            ? { ...user, status: action === "block" ? "Blocked" : "Active" }
+            : user
+        );
+        setUsersData(updatedUsersData);
+        console.log(`${action} user: ${selectedUser.name}`);
+        modalRef.current.close();
+        setSelectedUser(null);
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    }
   };
 
   const handleSaveAsExcel = () => {
@@ -113,9 +111,8 @@ const UserManagement = () => {
                 <th>#</th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Password</th>
+                <th>Role</th>
                 <th>Status</th>
-                <th>Created At</th>
                 <th></th>
               </tr>
             </thead>
@@ -126,7 +123,7 @@ const UserManagement = () => {
                     <th>{index + 1}</th>
                     <td>{user.name}</td>
                     <td>{user.email}</td>
-                    <td>{user.password}</td>
+                    <td>{user.role}</td>
                     <td
                       className={`font-bold ${
                         user.status === "Active" ? "text-success" : "text-error"
@@ -134,7 +131,6 @@ const UserManagement = () => {
                     >
                       {user.status}
                     </td>
-                    <td>{user.createdAt}</td>
                     <td>
                       <button
                         className={`btn btn-sm ${

@@ -1,44 +1,16 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar.jsx";
 import * as XLSX from "xlsx";
-
+import supabase from "../Supabase.jsx";
 const AcademicRecords = () => {
-  const [students, setStudents] = useState([
-    {
-      fullName: "Isabella Reyes",
-      lrn: "123456789012",
-      birthdate: "2011-06-12",
-      sex: "Female",
-      gradeLevel: "Grade 7",
-    },
-    {
-      fullName: "Ethan Cruz",
-      lrn: "987654321098",
-      birthdate: "2010-03-22",
-      sex: "Male",
-      gradeLevel: "Grade 8",
-    },
-    {
-      fullName: "Mia Santos",
-      lrn: "456789123456",
-      birthdate: "2012-08-05",
-      sex: "Female",
-      gradeLevel: "Grade 6",
-    },
-    {
-      fullName: "Liam Garcia",
-      lrn: "321654987654",
-      birthdate: "2011-11-30",
-      sex: "Male",
-      gradeLevel: "Grade 7",
-    },
-  ]);
-
+  const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [formData, setFormData] = useState({
-    fullName: "",
+    last_name: "",
+    first_name: "",
+    middle_name: "",
     lrn: "",
     birthdate: "",
     sex: "Male",
@@ -46,6 +18,24 @@ const AcademicRecords = () => {
   });
 
   const modalRef = useRef(null);
+
+  // Fetch students from Supabase
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const { data, error } = await supabase.from("StudentData").select("*");
+        if (error) {
+          console.error("Error fetching students:", error);
+        } else {
+          setStudents(data);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
+    };
+
+    fetchStudents();
+  }, []);
 
   const handleInputChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -58,7 +48,9 @@ const AcademicRecords = () => {
     } else {
       setSelectedStudent(null);
       setFormData({
-        fullName: "",
+        last_name: "",
+        first_name: "",
+        middle_name: "",
         lrn: "",
         birthdate: "",
         sex: "Male",
@@ -68,21 +60,69 @@ const AcademicRecords = () => {
     modalRef.current?.showModal();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    const { last_name, first_name, middle_name, lrn, birthdate, sex, gradeLevel } = formData;
+
     if (selectedStudent) {
-      const updated = students.map((s) =>
-        s.lrn === selectedStudent.lrn ? { ...formData } : s
-      );
-      setStudents(updated);
+      // Update student in Supabase
+      try {
+        const { error } = await supabase
+          .from("StudentData")
+          .update({
+            last_name,
+            first_name,
+            middle_name,
+            lrn,
+            birthdate,
+            sex,
+            gradeLevel,
+          })
+          .eq("lrn", selectedStudent.lrn);
+
+        if (error) {
+          console.error("Error updating student:", error);
+        } else {
+          const updated = students.map((s) =>
+            s.lrn === selectedStudent.lrn ? { ...formData } : s
+          );
+          setStudents(updated);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
     } else {
-      setStudents((prev) => [...prev, formData]);
+      // Insert new student into Supabase
+      try {
+        const { error } = await supabase.from("StudentData").insert([
+          {
+            last_name,
+            first_name,
+            middle_name,
+            lrn,
+            birthdate,
+            sex,
+            gradeLevel,
+          },
+        ]);
+
+        if (error) {
+          console.error("Error inserting student:", error);
+        } else {
+          setStudents((prev) => [...prev, formData]);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
     }
+
     modalRef.current.close();
   };
 
   const handleSaveAsExcel = () => {
     const filtered = students.filter((s) =>
-      s.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+      `${s.last_name} ${s.first_name} ${s.middle_name}`
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
     );
     const ws = XLSX.utils.json_to_sheet(filtered);
     const wb = XLSX.utils.book_new();
@@ -91,7 +131,9 @@ const AcademicRecords = () => {
   };
 
   const filteredStudents = students.filter((s) =>
-    s.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+    `${s.last_name} ${s.first_name} ${s.middle_name}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -135,7 +177,9 @@ const AcademicRecords = () => {
             <thead>
               <tr>
                 <th>#</th>
-                <th>Full Name</th>
+                <th>Last Name</th>
+                <th>First Name</th>
+                <th>Middle Name</th>
                 <th>LRN</th>
                 <th>Birthdate</th>
                 <th>Sex</th>
@@ -148,7 +192,9 @@ const AcademicRecords = () => {
                 filteredStudents.map((student, index) => (
                   <tr key={student.lrn}>
                     <th>{index + 1}</th>
-                    <td>{student.fullName}</td>
+                    <td>{student.last_name}</td>
+                    <td>{student.first_name}</td>
+                    <td>{student.middle_name}</td>
                     <td>{student.lrn}</td>
                     <td>{student.birthdate}</td>
                     <td>{student.sex}</td>
@@ -161,7 +207,13 @@ const AcademicRecords = () => {
                         Edit
                       </button>
                       <Link
-                        to="/student-grade"
+                        to={{
+                          pathname: "/student-grade",
+                        }}
+                        state={{
+                          lrn: student.lrn,
+                          gradeLevel: student.gradeLevel,
+                        }}
                         className="btn btn-sm btn-outline btn-warning hover:text-white"
                       >
                         View Grades
@@ -171,7 +223,7 @@ const AcademicRecords = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="text-center text-gray-500">
+                  <td colSpan="9" className="text-center text-gray-500">
                     No student records found.
                   </td>
                 </tr>
@@ -194,9 +246,25 @@ const AcademicRecords = () => {
             <div className="flex flex-col gap-3">
               <input
                 type="text"
-                name="fullName"
-                placeholder="Full Name"
-                value={formData.fullName}
+                name="last_name"
+                placeholder="Last Name"
+                value={formData.last_name}
+                onChange={handleInputChange}
+                className="input input-bordered w-full"
+              />
+              <input
+                type="text"
+                name="first_name"
+                placeholder="First Name"
+                value={formData.first_name}
+                onChange={handleInputChange}
+                className="input input-bordered w-full"
+              />
+              <input
+                type="text"
+                name="middle_name"
+                placeholder="Middle Name"
+                value={formData.middle_name}
                 onChange={handleInputChange}
                 className="input input-bordered w-full"
               />

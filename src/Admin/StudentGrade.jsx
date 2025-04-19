@@ -1,100 +1,198 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 import { IoArrowBack } from "react-icons/io5";
-
+import supabase from "../Supabase";
 const quarters = ["1st Quarter", "2nd Quarter", "3rd Quarter", "4th Quarter"];
-const gradeLevels = [
-  "Grade 1",
-  "Grade 2",
-  "Grade 3",
-  "Grade 4",
-  "Grade 5",
-  "Grade 6",
-];
 
 const StudentGrade = () => {
+  const location = useLocation();
+  const { lrn, gradeLevel } = location.state || {};
   const modalRef = useRef(null);
   const [grades, setGrades] = useState([]);
   const [formData, setFormData] = useState({
-    gradeLevel: "Grade 1",
+    lrn: lrn || "",
+    grade_level: gradeLevel || "",
     quarter: "1st Quarter",
-    subjects: {},
+    mother_tongue: "",
+    filipino: "",
+    english: "",
+    math: "",
+    science: "",
+    ap: "",
+    epp_tle: "",
+    mapeh: "",
+    music: "",
+    arts: "",
+    pe: "",
+    health: "",
+    ep: "",
+    arabic: "",
+    islamic: "",
+    average: "",
   });
   const [selectedCard, setSelectedCard] = useState(null);
 
-  const handleOpenModal = (cardKey = null) => {
-    if (cardKey) {
-      const selected = grades.find((g) => g.cardKey === cardKey);
-      setFormData(selected);
-      setSelectedCard(cardKey);
+  // Fetch grades from Supabase
+  useEffect(() => {
+    const fetchGrades = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("Grades")
+          .select("*")
+          .eq("lrn", lrn)
+          .eq("grade_level", gradeLevel);
+
+        if (error) {
+          console.error("Error fetching grades:", error);
+        } else {
+          setGrades(data);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
+    };
+
+    if (lrn && gradeLevel) {
+      fetchGrades();
+    }
+  }, [lrn, gradeLevel]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleOpenModal = (quarter = null) => {
+    if (quarter) {
+      const selected = grades.find((g) => g.quarter === quarter);
+      if (selected) {
+        setFormData(selected); // Populate formData with the selected grade's data
+      } else {
+        setFormData({
+          lrn: lrn || "",
+          grade_level: gradeLevel || "",
+          quarter: quarter,
+          mother_tongue: "",
+          filipino: "",
+          english: "",
+          math: "",
+          science: "",
+          ap: "",
+          epp_tle: "",
+          mapeh: "",
+          music: "",
+          arts: "",
+          pe: "",
+          health: "",
+          ep: "",
+          arabic: "",
+          islamic: "",
+          average: "",
+        });
+      }
+      setSelectedCard(quarter);
     } else {
       setFormData({
-        gradeLevel: "Grade 1",
+        lrn: lrn || "",
+        grade_level: gradeLevel || "",
         quarter: "1st Quarter",
-        subjects: {},
+        mother_tongue: "",
+        filipino: "",
+        english: "",
+        math: "",
+        science: "",
+        ap: "",
+        epp_tle: "",
+        mapeh: "",
+        music: "",
+        arts: "",
+        pe: "",
+        health: "",
+        ep: "",
+        arabic: "",
+        islamic: "",
+        average: "",
       });
       setSelectedCard(null);
     }
     modalRef.current?.showModal();
   };
-
-  const handleInputChange = (e, subject) => {
-    const value = e.target.value;
-    setFormData((prev) => ({
-      ...prev,
-      subjects: {
-        ...prev.subjects,
-        [subject]: value,
-      },
-    }));
-  };
-
-  const handleSubmit = () => {
-    const cardKey = `${formData.gradeLevel}-${formData.quarter}`;
-    const existing = grades.find((g) => g.cardKey === cardKey);
-    if (existing) {
-      const updated = grades.map((g) =>
-        g.cardKey === cardKey ? { ...formData, cardKey } : g
-      );
-      setGrades(updated);
-    } else {
-      setGrades((prev) => [...prev, { ...formData, cardKey }]);
+  const handleSubmit = async () => {
+    try {
+      if (formData.id) {
+        // Update existing grade using the id
+        const { error } = await supabase
+          .from("Grades")
+          .update(formData)
+          .eq("id", formData.id);
+  
+        if (error) {
+          console.error("Error updating grade:", error);
+        } else {
+          // Refresh the grades list after successful update
+          const { data: updatedGrades, error: fetchError } = await supabase
+            .from("Grades")
+            .select("*")
+            .eq("lrn", lrn)
+            .eq("grade_level", gradeLevel);
+  
+          if (fetchError) {
+            console.error("Error fetching updated grades:", fetchError);
+          } else {
+            setGrades(updatedGrades);
+          }
+        }
+      } else {
+        // Insert new grade
+        const { error } = await supabase.from("Grades").insert([formData]);
+  
+        if (error) {
+          console.error("Error inserting grade:", error);
+        } else {
+          // Refresh the grades list after successful insert
+          const { data: updatedGrades, error: fetchError } = await supabase
+            .from("Grades")
+            .select("*")
+            .eq("lrn", lrn)
+            .eq("grade_level", gradeLevel);
+  
+          if (fetchError) {
+            console.error("Error fetching updated grades:", fetchError);
+          } else {
+            setGrades(updatedGrades);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
     }
+  
     modalRef.current.close();
   };
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from("Grades")
+        .delete()
+        .eq("lrn", lrn)
+        .eq("grade_level", gradeLevel)
+        .eq("quarter", formData.quarter);
 
-  const handleDelete = () => {
-    setGrades((prev) => prev.filter((g) => g.cardKey !== selectedCard));
+      if (error) {
+        console.error("Error deleting grade:", error);
+      } else {
+        window.location.reload(); // Refresh the page to reflect changes
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    }
+
     modalRef.current.close();
   };
 
   const handlePrint = () => {
     window.print();
-  };
-
-  const renderCard = (gradeLevel, quarter) => {
-    const cardKey = `${gradeLevel}-${quarter}`;
-    const entry = grades.find((g) => g.cardKey === cardKey);
-    return (
-      <div
-        key={cardKey}
-        onClick={() => handleOpenModal(cardKey)}
-        className="cursor-pointer bg-white border rounded-xl shadow p-4 hover:shadow-md"
-      >
-        <h2 className="font-bold mb-2">{`${gradeLevel} - ${quarter}`}</h2>
-        {entry ? (
-          <ul className="text-sm text-gray-700 space-y-1">
-            {Object.entries(entry.subjects).map(([subject, score]) => (
-              <li key={subject}>
-                <strong>{subject}:</strong> {score}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-400 italic">No grades entered</p>
-        )}
-      </div>
-    );
   };
 
   return (
@@ -125,90 +223,106 @@ const StudentGrade = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {gradeLevels.map((grade) =>
-            quarters.map((quarter) => renderCard(grade, quarter))
-          )}
+  {grades.length > 0 ? (
+    grades.map((grade) => (
+      <div
+        key={grade.quarter}
+        onClick={() => handleOpenModal(grade.quarter)}
+        className="cursor-pointer bg-white border rounded-xl shadow p-4 hover:shadow-md"
+      >
+        <h2 className="font-bold mb-2">{grade.grade_level} - {grade.quarter}</h2>
+        <p className="text-gray-700">Grades entered</p>
+      </div>
+    ))
+  ) : (
+    <p className="text-gray-500 italic col-span-full text-center">
+      No grades available.
+    </p>
+  )}
+</div><dialog ref={modalRef} className="modal">
+  <div className="modal-box">
+    <form method="dialog">
+      <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+        ✕
+      </button>
+    </form>
+    <h3 className="font-bold text-lg mb-4">
+      {selectedCard ? "Edit Grades" : "Add Grades"}
+    </h3>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {!selectedCard && (
+        <div className="col-span-1 md:col-span-3">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Quarter
+          </label>
+          <select
+            name="quarter"
+            value={formData.quarter}
+            onChange={handleInputChange}
+            className="select select-bordered w-full"
+          >
+            {quarters.map((q) => (
+              <option key={q} value={q}>
+                {q}
+              </option>
+            ))}
+          </select>
         </div>
+      )}
 
-        <dialog ref={modalRef} className="modal">
-          <div className="modal-box">
-            <form method="dialog">
-              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-                ✕
-              </button>
-            </form>
-            <h3 className="font-bold text-lg mb-4">
-              {selectedCard ? "Edit Grades" : "Add Grades"}
-            </h3>
+      {[
+        "mother_tongue",
+        "filipino",
+        "english",
+        "math",
+        "science",
+        "ap",
+        "epp_tle",
+        "mapeh",
+        "music",
+        "arts",
+        "pe",
+        "health",
+        "ep",
+        "arabic",
+        "islamic",
+        "average",
+      ].map((subject) => (
+        <div key={subject}>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {subject.replace("_", " ").toUpperCase()}
+          </label>
+          <input
+            type="number"
+            name={subject}
+            placeholder="Enter grade"
+            value={formData[subject] || ""}
+            onChange={handleInputChange}
+            className="input input-bordered w-full"
+          />
+        </div>
+      ))}
+    </div>
 
-            <div className="flex flex-col gap-3">
-              <select
-                value={formData.gradeLevel}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    gradeLevel: e.target.value,
-                  }))
-                }
-                className="select select-bordered w-full"
-              >
-                {gradeLevels.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={formData.quarter}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, quarter: e.target.value }))
-                }
-                className="select select-bordered w-full"
-              >
-                {quarters.map((q) => (
-                  <option key={q} value={q}>
-                    {q}
-                  </option>
-                ))}
-              </select>
-
-              {[
-                "Math",
-                "English",
-                "Science",
-                "Filipino",
-                "Araling Panlipunan",
-              ].map((subject) => (
-                <input
-                  key={subject}
-                  type="number"
-                  placeholder={`${subject} Grade`}
-                  value={formData.subjects[subject] || ""}
-                  onChange={(e) => handleInputChange(e, subject)}
-                  className="input input-bordered w-full"
-                />
-              ))}
-            </div>
-
-            <div className="flex justify-end gap-3 mt-5">
-              {selectedCard && (
-                <button
-                  className="btn btn-error text-white"
-                  onClick={handleDelete}
-                >
-                  Delete
-                </button>
-              )}
-              <button
-                className="btn btn-primary text-white"
-                onClick={handleSubmit}
-              >
-                {selectedCard ? "Update" : "Save"}
-              </button>
-            </div>
-          </div>
-        </dialog>
+    <div className="flex justify-end gap-3 mt-5">
+      {selectedCard && (
+        <button
+          className="btn btn-error text-white"
+          onClick={handleDelete}
+        >
+          Delete
+        </button>
+      )}
+      <button
+        className="btn btn-primary text-white"
+        onClick={handleSubmit}
+      >
+        {selectedCard ? "Update" : "Save"}
+      </button>
+    </div>
+  </div>
+</dialog>
       </main>
     </div>
   );

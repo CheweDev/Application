@@ -1,24 +1,53 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaSignInAlt } from "react-icons/fa";
+import supabase from "../Supabase";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("TEACHER");
 
   const location = useLocation();
   const navigate = useNavigate();
   const isLoginPage = location.pathname === "/";
   const isRegisterPage = location.pathname === "/register";
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate login
-    setTimeout(() => {
-      setIsLoading(false);
+  
+    try {
+      const { data, error } = await supabase
+        .from("Users")
+        .select("*")
+        .eq("email", email)
+        .eq("password", password)
+        .eq("role", role);
+  
+      if (error) {
+        console.error("Error fetching data:", error);
+        openModal();
+      } else if (data.length === 0) {
+        console.log("Invalid credentials");
+        openModal();
+      } else {
+        console.log("Login successful:", data);
+
+        if (role === "ADMIN") {
+          navigate("/admin-dashboard");
+        } else if (role === "TEACHER") {
+          navigate("/teacher-dashboard");
+        }
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
       openModal();
-    }, 2000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const openModal = () => {
@@ -112,7 +141,13 @@ const Login = () => {
                     <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
                   </g>
                 </svg>
-                <input type="email" placeholder="example@gmail.com" required />
+                <input
+                  type="email"
+                  placeholder="example@gmail.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </label>
               <div className="validator-hint hidden">
                 Enter valid email address
@@ -145,6 +180,8 @@ const Login = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </label>
@@ -164,6 +201,8 @@ const Login = () => {
             <div className="flex flex-col sm:flex-row items-center w-full space-y-4 sm:space-y-0 sm:space-x-4">
               <select
                 className="select w-full sm:w-1/3 md:w-1/2 px-4 py-2 rounded-md border border-gray-300"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
                 required
               >
                 <option value="TEACHER">Teacher</option>
@@ -173,7 +212,7 @@ const Login = () => {
               <button
                 type="submit"
                 className="btn bg-[#048d04] border-[#048d04] text-white w-full sm:w-auto md:w-2/3 rounded-md py-2 px-4 flex items-center justify-center"
-                disabled={setIsLoading}
+                disabled={isLoading}
               >
                 {isLoading ? (
                   <>
@@ -203,7 +242,7 @@ const Login = () => {
             </button>
           </form>
           <h3 className="font-bold text-lg text-red-500">Login Failed</h3>
-          <p className="py-4">Please check your email and password.</p>
+          <p className="py-4">Invalid email, password, or role. Please try again.</p>
         </div>
       </dialog>
     </>
