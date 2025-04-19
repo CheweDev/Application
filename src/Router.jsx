@@ -6,6 +6,7 @@ import RequestManagement from "./Admin/RequestManagement.jsx";
 import AccountManagement from "./Admin/AccountManagement.jsx";
 import AcademicRecords from "./Admin/AcademicRecords.jsx";
 import StudentGrade from "./Admin/StudentGrade.jsx";
+import SF10Template from "./Admin/SF10Template.jsx";
 
 const Router = () => {
   return (
@@ -18,6 +19,7 @@ const Router = () => {
         <Route path="/account" element={<AccountManagement />} />
         <Route path="/academic-records" element={<AcademicRecords />} />
         <Route path="/student-grade" element={<StudentGrade />} />
+        <Route path="/template" element={<SF10Template />} />
       </Routes>
     </BrowserRouter>
   );
