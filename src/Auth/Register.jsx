@@ -9,6 +9,7 @@ const Register = () => {
   const [name, setFullName] = useState("");
   const [grade_level, setGradeLevel] = useState("");
   const [email, setEmail] = useState("");
+  const [section, setSection] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("TEACHER");
@@ -30,7 +31,7 @@ const Register = () => {
 
     try {
       const { data, error } = await supabase.from("Users").insert([
-        { name, grade_level, email, password, role },
+        { name, grade_level, email, password, role, section },
       ]);
 
       if (error) {
@@ -140,6 +141,18 @@ const Register = () => {
                   placeholder="Grade Level - Ex. Grade 1"
                   value={grade_level}
                   onChange={(e) => setGradeLevel(e.target.value)}
+                  required
+                />
+              </label>
+            </div>
+
+            <div className="mb-3">
+              <label className="input validator w-full">
+                <input
+                  type="text"
+                  placeholder="Section - Ex. Narra"
+                  value={section}
+                  onChange={(e) => setSection(e.target.value)}
                   required
                 />
               </label>

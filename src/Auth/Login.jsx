@@ -34,12 +34,19 @@ const Login = () => {
         console.log("Invalid credentials");
         openModal();
       } else {
+        if (data[0].status === 'Blocked') {
+          throw new Error('Your account has been blocked. Please contact the administrator.');
+        }
         console.log("Login successful:", data);
+
+        // Store grade_level and section in sessionStorage
+        sessionStorage.setItem('grade_level', data[0].grade_level || '');
+        sessionStorage.setItem('section', data[0].section || '');
 
         if (role === "ADMIN") {
           navigate("/admin-dashboard");
         } else if (role === "TEACHER") {
-          navigate("/teacher-dashboard");
+          navigate("/user-dashboard");
         }
       }
     } catch (err) {

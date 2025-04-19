@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import UserSidebar from "./UserSidebar.jsx";
 import { FaUsers } from "react-icons/fa";
 import { MdOutlineClass } from "react-icons/md";
+import supabase from "../Supabase.jsx";
 
 const UserDashboard = () => {
   const [filters, setFilters] = useState({
@@ -9,75 +10,71 @@ const UserDashboard = () => {
     section: "All",
     status: "All",
   });
+  const [students, setStudents] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const studentData = [
-    {
-      id: 1,
-      name: "Emma Rodriguez",
-      gradeLevel: "Grade 7",
-      section: "Diamond",
-      status: "Approved",
-    },
-    {
-      id: 2,
-      name: "Joshua Kim",
-      gradeLevel: "Grade 7",
-      section: "Diamond",
-      status: "Pending",
-    },
-    {
-      id: 3,
-      name: "Olivia Chen",
-      gradeLevel: "Grade 7",
-      section: "Pearl",
-      status: "Declined",
-    },
-    {
-      id: 4,
-      name: "Ethan Williams",
-      gradeLevel: "Grade 8",
-      section: "Ruby",
-      status: "Approved",
-    },
-    {
-      id: 5,
-      name: "Sophia Martinez",
-      gradeLevel: "Grade 8",
-      section: "Ruby",
-      status: "Pending",
-    },
-    {
-      id: 6,
-      name: "Noah Johnson",
-      gradeLevel: "Grade 8",
-      section: "Emerald",
-      status: "Approved",
-    },
-    {
-      id: 7,
-      name: "Ava Thompson",
-      gradeLevel: "Grade 9",
-      section: "Sapphire",
-      status: "Pending",
-    },
-    {
-      id: 8,
-      name: "William Davis",
-      gradeLevel: "Grade 9",
-      section: "Sapphire",
-      status: "Declined",
-    },
-  ];
+  // Fetch students and requests based on teacher's grade_level and section
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const gradeLevel = sessionStorage.getItem('grade_level');
+        const section = sessionStorage.getItem('section');
+
+        // Fetch students
+        const { data: studentData, error: studentError } = await supabase
+          .from("StudentData")
+          .select("*")
+          .eq("gradeLevel", gradeLevel)
+          .eq("section", section);
+
+        if (studentError) {
+          console.error("Error fetching students:", studentError);
+        } else {
+          setStudents(studentData);
+        }
+
+        // Fetch requests
+        const { data: requestData, error: requestError } = await supabase
+          .from("Request")
+          .select("*")
+          .eq("grade_level", gradeLevel)
+          .eq("section", section);
+
+        if (requestError) {
+          console.error("Error fetching requests:", requestError);
+        } else {
+          setRequests(requestData);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // Extract unique values for filters
-  const uniqueGradeLevels = [
-    ...new Set(studentData.map((item) => item.gradeLevel)),
-  ];
-  const uniqueSections = [...new Set(studentData.map((item) => item.section))];
+  const uniqueGradeLevels = [...new Set(students.map((item) => item.gradeLevel))];
+  const uniqueSections = [...new Set(students.map((item) => item.section))];
   const uniqueStatuses = ["Pending", "Approved", "Declined"];
 
+  // Combine student and request data
+  const combinedData = students.map(student => {
+    const studentRequest = requests.find(request => request.student_id === student.lrn);
+    return {
+      id: student.lrn,
+      name: `${student.first_name} ${student.last_name}`,
+      gradeLevel: student.gradeLevel,
+      section: student.section,
+      status: studentRequest ? studentRequest.status : "No Request",
+    };
+  });
+
   // Apply filters to data
-  const filteredData = studentData.filter((item) => {
+  const filteredData = combinedData.filter((item) => {
     const matchGradeLevel =
       filters.gradeLevel === "All" || item.gradeLevel === filters.gradeLevel;
     const matchSection =
@@ -107,10 +104,23 @@ const UserDashboard = () => {
         return "bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium";
       case "Declined":
         return "bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium";
+      case "No Request":
+        return "bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium";
       default:
         return "bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium";
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-gray-100">
+        <UserSidebar />
+        <main className="flex-1 p-6 lg:ml-64 flex items-center justify-center">
+          <span className="loading loading-spinner loading-lg"></span>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-100">

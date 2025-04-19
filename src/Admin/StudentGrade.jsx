@@ -4,12 +4,25 @@ import AdminSidebar from "./AdminSidebar";
 import { IoArrowBack } from "react-icons/io5";
 import supabase from "../Supabase";
 import { IoMdPrint } from "react-icons/io";
+import CryptoJS from "crypto-js"; // Import crypto-js
 
 const quarters = ["1st Quarter", "2nd Quarter", "3rd Quarter", "4th Quarter"];
 
+
+const ENCRYPTION_KEY = "your-secure-key";
+
+const encryptData = (data) => {
+  return CryptoJS.AES.encrypt(data.toString(), ENCRYPTION_KEY).toString();
+};
+
+const decryptData = (cipherText) => {
+  const bytes = CryptoJS.AES.decrypt(cipherText, ENCRYPTION_KEY);
+  return bytes.toString(CryptoJS.enc.Utf8);
+};
+
 const StudentGrade = () => {
   const location = useLocation();
-  const { lrn, gradeLevel } = location.state || {};
+  const { lrn, gradeLevel, name } = location.state || {};
   const modalRef = useRef(null);
   const [grades, setGrades] = useState([]);
   const [formData, setFormData] = useState({
@@ -48,7 +61,36 @@ const StudentGrade = () => {
         if (error) {
           console.error("Error fetching grades:", error);
         } else {
-          setGrades(data);
+          // Decrypt grades before setting them
+          const decryptedGrades = data.map((grade) => {
+            const decryptedGrade = { ...grade };
+            Object.keys(decryptedGrade).forEach((key) => {
+              if (
+                [
+                  "mother_tongue",
+                  "filipino",
+                  "english",
+                  "math",
+                  "science",
+                  "ap",
+                  "epp_tle",
+                  "mapeh",
+                  "music",
+                  "arts",
+                  "pe",
+                  "health",
+                  "ep",
+                  "arabic",
+                  "islamic",
+                  "average",
+                ].includes(key)
+              ) {
+                decryptedGrade[key] = decryptData(decryptedGrade[key]);
+              }
+            });
+            return decryptedGrade;
+          });
+          setGrades(decryptedGrades);
         }
       } catch (err) {
         console.error("Unexpected error:", err);
@@ -120,13 +162,41 @@ const StudentGrade = () => {
     }
     modalRef.current?.showModal();
   };
+
   const handleSubmit = async () => {
     try {
+      // Encrypt formData before sending to Supabase
+      const encryptedFormData = { ...formData };
+      Object.keys(encryptedFormData).forEach((key) => {
+        if (
+          [
+            "mother_tongue",
+            "filipino",
+            "english",
+            "math",
+            "science",
+            "ap",
+            "epp_tle",
+            "mapeh",
+            "music",
+            "arts",
+            "pe",
+            "health",
+            "ep",
+            "arabic",
+            "islamic",
+            "average",
+          ].includes(key)
+        ) {
+          encryptedFormData[key] = encryptData(encryptedFormData[key]);
+        }
+      });
+
       if (formData.id) {
         // Update existing grade using the id
         const { error } = await supabase
           .from("Grades")
-          .update(formData)
+          .update(encryptedFormData)
           .eq("id", formData.id);
 
         if (error) {
@@ -142,17 +212,45 @@ const StudentGrade = () => {
           if (fetchError) {
             console.error("Error fetching updated grades:", fetchError);
           } else {
-            setGrades(updatedGrades);
+            setGrades(
+              updatedGrades.map((grade) => {
+                const decryptedGrade = { ...grade };
+                Object.keys(decryptedGrade).forEach((key) => {
+                  if (
+                    [
+                      "mother_tongue",
+                      "filipino",
+                      "english",
+                      "math",
+                      "science",
+                      "ap",
+                      "epp_tle",
+                      "mapeh",
+                      "music",
+                      "arts",
+                      "pe",
+                      "health",
+                      "ep",
+                      "arabic",
+                      "islamic",
+                      "average",
+                    ].includes(key)
+                  ) {
+                    decryptedGrade[key] = decryptData(decryptedGrade[key]);
+                  }
+                });
+                return decryptedGrade;
+              })
+            );
           }
         }
       } else {
         // Insert new grade
-        const { error } = await supabase.from("Grades").insert([formData]);
+        const { error } = await supabase.from("Grades").insert([encryptedFormData]);
 
         if (error) {
           console.error("Error inserting grade:", error);
         } else {
-          // Refresh the grades list after successful insert
           const { data: updatedGrades, error: fetchError } = await supabase
             .from("Grades")
             .select("*")
@@ -162,7 +260,36 @@ const StudentGrade = () => {
           if (fetchError) {
             console.error("Error fetching updated grades:", fetchError);
           } else {
-            setGrades(updatedGrades);
+            setGrades(
+              updatedGrades.map((grade) => {
+                const decryptedGrade = { ...grade };
+                Object.keys(decryptedGrade).forEach((key) => {
+                  if (
+                    [
+                      "mother_tongue",
+                      "filipino",
+                      "english",
+                      "math",
+                      "science",
+                      "ap",
+                      "epp_tle",
+                      "mapeh",
+                      "music",
+                      "arts",
+                      "pe",
+                      "health",
+                      "ep",
+                      "arabic",
+                      "islamic",
+                      "average",
+                    ].includes(key)
+                  ) {
+                    decryptedGrade[key] = decryptData(decryptedGrade[key]);
+                  }
+                });
+                return decryptedGrade;
+              })
+            );
           }
         }
       }
@@ -172,6 +299,7 @@ const StudentGrade = () => {
 
     modalRef.current.close();
   };
+
   const handleDelete = async () => {
     try {
       const { error } = await supabase
@@ -184,7 +312,7 @@ const StudentGrade = () => {
       if (error) {
         console.error("Error deleting grade:", error);
       } else {
-        window.location.reload(); // Refresh the page to reflect changes
+        window.location.reload();
       }
     } catch (err) {
       console.error("Unexpected error:", err);
@@ -209,7 +337,7 @@ const StudentGrade = () => {
             >
               <IoArrowBack size={24} />
             </button>
-            <h1 className="text-2xl">Add Grades for [name]</h1>
+            <h1 className="text-2xl">Add Grades for {name}</h1>
           </div>
           <div className="flex gap-2">
             <button

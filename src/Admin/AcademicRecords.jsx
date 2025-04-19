@@ -17,6 +17,7 @@ const AcademicRecords = () => {
     birthdate: "",
     sex: "Male",
     gradeLevel: "",
+    section: "",
   });
 
   const modalRef = useRef(null);
@@ -57,6 +58,7 @@ const AcademicRecords = () => {
         birthdate: "",
         sex: "Male",
         gradeLevel: "",
+        section: "",
       });
     }
     modalRef.current?.showModal();
@@ -71,6 +73,7 @@ const AcademicRecords = () => {
       birthdate,
       sex,
       gradeLevel,
+      section,
     } = formData;
 
     if (selectedStudent) {
@@ -86,6 +89,7 @@ const AcademicRecords = () => {
             birthdate,
             sex,
             gradeLevel,
+            section,
           })
           .eq("lrn", selectedStudent.lrn);
 
@@ -112,6 +116,7 @@ const AcademicRecords = () => {
             birthdate,
             sex,
             gradeLevel,
+            section,
           },
         ]);
 
@@ -211,25 +216,41 @@ const AcademicRecords = () => {
                     <td>{student.sex}</td>
                     <td>{student.gradeLevel}</td>
                     <td className="flex gap-2">
-                      <button
-                        className="btn btn-sm btn-outline btn-info hover:text-white"
-                        onClick={() => handleOpenModal(student)}
-                      >
-                        Edit Info
-                      </button>
-                      <Link
-                        to={{
-                          pathname: "/student-grade",
-                        }}
-                        state={{
-                          lrn: student.lrn,
-                          gradeLevel: student.gradeLevel,
-                        }}
-                        className="btn btn-sm btn-outline btn-warning hover:text-white"
-                      >
-                        View Grades
-                      </Link>
-                    </td>
+                    <button
+                      className="btn btn-sm btn-outline btn-info hover:text-white"
+                      onClick={() => handleOpenModal(student)}
+                    >
+                      Edit Info
+                    </button>
+                    <Link
+                      to={{
+                        pathname: "/student-grade",
+                      }}
+                      state={{
+                        lrn: student.lrn,
+                        gradeLevel: student.gradeLevel,
+                        name: `${student.first_name} ${student.last_name}`,
+                      }}
+                      className="btn btn-sm btn-outline btn-warning hover:text-white"
+                    >
+                      View Grades
+                    </Link>
+                    <Link
+                      to={{
+                        pathname: "/template",
+                      }}
+                      state={{
+                        lrn: student.lrn,
+                        gradeLevel: student.gradeLevel,
+                        name: `${student.first_name} ${student.last_name}`,
+                        birthdate: student.birthdate,
+                        sex: student.sex,
+                      }}
+                      className="btn btn-sm btn-outline btn-success hover:text-white"
+                    >
+                      Print
+                    </Link>
+                  </td>
                   </tr>
                 ))
               ) : (
@@ -309,6 +330,14 @@ const AcademicRecords = () => {
                 name="gradeLevel"
                 placeholder="Grade Level (e.g., Grade 7)"
                 value={formData.gradeLevel}
+                onChange={handleInputChange}
+                className="input input-bordered w-full"
+              />
+              <input
+                type="text"
+                name="section"
+                placeholder="Section"
+                value={formData.section}
                 onChange={handleInputChange}
                 className="input input-bordered w-full"
               />

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar.jsx";
 import { FaUsers } from "react-icons/fa";
 import { GiTeacher } from "react-icons/gi";
+import supabase from "../Supabase.jsx";
 
 const AdminDashboard = () => {
   const [filters, setFilters] = useState({
@@ -9,64 +10,74 @@ const AdminDashboard = () => {
     date: "All",
     year: "All",
   });
+  const [students, setStudents] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const tableData = [
-    {
-      id: 1,
-      name: "Avery Thompson",
-      date: "04/17/2025",
-      year: "2025-2026",
-      remarks: "Pending",
-    },
-    {
-      id: 2,
-      name: "Lucas Ramirez",
-      date: "04/17/2025",
-      year: "2025-2026",
-      remarks: "Accepted",
-    },
-    {
-      id: 3,
-      name: "Samantha Blake",
-      date: "04/17/2025",
-      year: "2025-2026",
-      remarks: "Pending",
-    },
-    {
-      id: 4,
-      name: "Natalie Cruz",
-      date: "04/15/2025",
-      year: "2025-2026",
-      remarks: "Pending",
-    },
-    {
-      id: 5,
-      name: "Jasper Whitman",
-      date: "04/18/2025",
-      year: "2025-2026",
-      remarks: "Rejected",
-    },
-    {
-      id: 6,
-      name: "Elena Foster",
-      date: "04/18/2025",
-      year: "2025-2026",
-      remarks: "Rejected",
-    },
-    {
-      id: 7,
-      name: "Miles Anderson",
-      date: "04/18/2025",
-      year: "2025-2026",
-      remarks: "Rejected",
-    },
-  ];
+  // Fetch all data from Supabase
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch all students
+        const { data: studentData, error: studentError } = await supabase
+          .from("StudentData")
+          .select("*");
 
-  const uniqueDates = [...new Set(tableData.map((item) => item.date))];
-  const uniqueYears = [...new Set(tableData.map((item) => item.year))];
-  const uniqueRemarks = [...new Set(tableData.map((item) => item.remarks))];
+        if (studentError) {
+          console.error("Error fetching students:", studentError);
+        } else {
+          setStudents(studentData);
+        }
 
-  const filteredData = tableData.filter((item) => {
+        // Fetch all requests
+        const { data: requestData, error: requestError } = await supabase
+          .from("Request")
+          .select("*");
+
+        if (requestError) {
+          console.error("Error fetching requests:", requestError);
+        } else {
+          setRequests(requestData);
+        }
+
+        // Fetch all teachers
+        const { data: teacherData, error: teacherError } = await supabase
+          .from("TeacherData")
+          .select("*");
+
+        if (teacherError) {
+          console.error("Error fetching teachers:", teacherError);
+        } else {
+          setTeachers(teacherData);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Combine student and request data
+  const combinedData = requests.map(request => {
+    const student = students.find(s => s.lrn === request.student_id);
+    return {
+      id: request.id,
+      name: student ? `${student.first_name} ${student.last_name}` : "Unknown Student",
+      date: new Date(request.created_at).toLocaleDateString(),
+      year: request.school_year || "2023-2024",
+      remarks: request.status,
+    };
+  });
+
+  const uniqueDates = [...new Set(combinedData.map((item) => item.date))];
+  const uniqueYears = [...new Set(combinedData.map((item) => item.year))];
+  const uniqueRemarks = [...new Set(combinedData.map((item) => item.remarks))];
+
+  const filteredData = combinedData.filter((item) => {
     const matchRemarks =
       filters.remarks === "All" || item.remarks === filters.remarks;
     const matchDate = filters.date === "All" || item.date === filters.date;
@@ -80,6 +91,17 @@ const AdminDashboard = () => {
       [key]: value,
     }));
   };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-gray-100">
+        <AdminSidebar />
+        <main className="flex-1 p-6 lg:ml-64 flex items-center justify-center">
+          <span className="loading loading-spinner loading-lg"></span>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -100,7 +122,7 @@ const AdminDashboard = () => {
               <h3 className="text-gray-600 text-sm uppercase font-semibold tracking-widest">
                 Total Students
               </h3>
-              <p className="text-2xl font-bold text-gray-800">10</p>
+              <p className="text-2xl font-bold text-gray-800">{students.length}</p>
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-md p-5 flex items-center border-l-4 border-yellow-500">
@@ -111,7 +133,7 @@ const AdminDashboard = () => {
               <h3 className="text-gray-600 text-sm uppercase font-semibold tracking-widest">
                 Total Teachers
               </h3>
-              <p className="text-2xl font-bold text-gray-800">10</p>
+              <p className="text-2xl font-bold text-gray-800">{teachers.length}</p>
             </div>
           </div>
         </div>
@@ -137,24 +159,7 @@ const AdminDashboard = () => {
           </div>
 
           <div className="flex gap-4 flex-wrap">
-            {/* Date Filter */}
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">
-                Filter by Date:
-              </label>
-              <select
-                value={filters.date}
-                onChange={(e) => handleFilterChange("date", e.target.value)}
-                className="select select-bordered select-sm w-48"
-              >
-                <option value="All">All</option>
-                {uniqueDates.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-            </div>
+        
 
             {/* School Year Filter */}
             <div>

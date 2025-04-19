@@ -1,70 +1,117 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import UserSidebar from "./UserSidebar.jsx";
+import supabase from "../Supabase.jsx";
 
 const Request = () => {
-  const [requestSent, setRequestSent] = useState({});
+  const [requests, setRequests] = useState([]);
+  const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  const modalRef = useRef(null);
 
-  const studentData = [
-    {
-      id: 1,
-      name: "Emma Rodriguez",
-      gradeLevel: "Grade 7",
-      section: "Diamond",
-    },
-    {
-      id: 2,
-      name: "Joshua Kim",
-      gradeLevel: "Grade 7",
-      section: "Diamond",
-    },
-    {
-      id: 3,
-      name: "Olivia Chen",
-      gradeLevel: "Grade 7",
-      section: "Pearl",
-    },
-    {
-      id: 4,
-      name: "Ethan Williams",
-      gradeLevel: "Grade 8",
-      section: "Ruby",
-    },
-    {
-      id: 5,
-      name: "Sophia Martinez",
-      gradeLevel: "Grade 8",
-      section: "Ruby",
-    },
-    {
-      id: 6,
-      name: "Noah Johnson",
-      gradeLevel: "Grade 8",
-      section: "Emerald",
-    },
-    {
-      id: 7,
-      name: "Ava Thompson",
-      gradeLevel: "Grade 9",
-      section: "Sapphire",
-    },
-    {
-      id: 8,
-      name: "William Davis",
-      gradeLevel: "Grade 9",
-      section: "Sapphire",
-    },
-  ];
+  // Fetch students and requests based on teacher's grade_level and section
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const gradeLevel = sessionStorage.getItem('grade_level');
+        const section = sessionStorage.getItem('section');
 
-  const handlePrintRequest = (studentId) => {
-    setRequestSent((prev) => ({
-      ...prev,
-      [studentId]: true,
-    }));
-    setTimeout(() => {
-      console.log(`Print request submitted for student ID: ${studentId}`);
-    }, 500);
+        // Fetch students
+        const { data: studentData, error: studentError } = await supabase
+          .from("StudentData")
+          .select("*")
+          .eq("gradeLevel", gradeLevel)
+          .eq("section", section);
+
+        if (studentError) {
+          console.error("Error fetching students:", studentError);
+        } else {
+          setStudents(studentData);
+        }
+
+        // Fetch requests
+        const { data: requestData, error: requestError } = await supabase
+          .from("Request")
+          .select("*")
+          .eq("grade_level", gradeLevel)
+          .eq("section", section);
+
+        if (requestError) {
+          console.error("Error fetching requests:", requestError);
+        } else {
+          setRequests(requestData);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleOpenModal = () => {
+    setSelectedStudents([]);
+    modalRef.current?.showModal();
   };
+
+  const handleAddRequest = async () => {
+    try {
+      const gradeLevel = sessionStorage.getItem('grade_level');
+      const section = sessionStorage.getItem('section');
+      const currentYear = new Date().getFullYear();
+      const schoolYear = `${currentYear}-${currentYear + 1}`;
+
+      // Create requests for selected students
+      const newRequests = selectedStudents.map(student => ({
+        student_id: student.lrn,
+        student_name: `${student.first_name} ${student.last_name}`,
+        grade_level: gradeLevel,
+        section: section,
+        status: "Pending",
+        school_year: schoolYear,
+        created_at: new Date().toISOString()
+      }));
+
+      const { error } = await supabase
+        .from("Request")
+        .insert(newRequests);
+
+      if (error) {
+        console.error("Error adding requests:", error);
+      } else {
+        // Refresh requests list
+        const { data: updatedRequests, error: fetchError } = await supabase
+          .from("Request")
+          .select("*")
+          .eq("grade_level", gradeLevel)
+          .eq("section", section);
+
+        if (fetchError) {
+          console.error("Error fetching updated requests:", fetchError);
+        } else {
+          setRequests(updatedRequests);
+        }
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    }
+
+    modalRef.current.close();
+  };
+
+  const handleStudentSelect = (student) => {
+    setSelectedStudents(prev => {
+      if (prev.some(s => s.lrn === student.lrn)) {
+        return prev.filter(s => s.lrn !== student.lrn);
+      } else {
+        return [...prev, student];
+      }
+    });
+  };
+
+  const filteredRequests = requests.filter(request =>
+    request.student_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -79,16 +126,24 @@ const Request = () => {
               Request printed copies of student records
             </p>
           </div>
-          <input
-            type="text"
-            placeholder="Search by name"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="input input-bordered w-full max-w-xs"
-          />
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Search by name"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="input input-bordered w-full max-w-xs"
+            />
+            <button
+              className="btn btn-primary"
+              onClick={handleOpenModal}
+            >
+              + Add Request
+            </button>
+          </div>
         </div>
 
-        {/* Student Table */}
+        {/* Requests Table */}
         <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100 shadow-lg">
           <table className="table">
             <thead>
@@ -97,51 +152,91 @@ const Request = () => {
                 <th>Student Name</th>
                 <th>Grade Level</th>
                 <th>Section</th>
-                <th>Action</th>
+                <th>Status</th>
+                <th>Date Requested</th>
               </tr>
             </thead>
             <tbody>
-              {studentData.filter((student) =>
-                student.name.toLowerCase().includes(searchQuery.toLowerCase())
-              ).length === 0 ? (
+              {filteredRequests.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-4 text-red-500">
-                    No matching student found.
+                  <td colSpan="6" className="text-center py-4 text-red-500">
+                    No requests found.
                   </td>
                 </tr>
               ) : (
-                studentData
-                  .filter((student) =>
-                    student.name
-                      .toLowerCase()
-                      .includes(searchQuery.toLowerCase())
-                  )
-                  .map((student, index) => (
-                    <tr key={student.id}>
-                      <th className="font-normal">{index + 1}</th>
-                      <td>{student.name}</td>
-                      <td>{student.gradeLevel}</td>
-                      <td>{student.section}</td>
-                      <td>
-                        {requestSent[student.id] ? (
-                          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-md text-xs font-medium">
-                            Request Sent
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handlePrintRequest(student.id)}
-                            className="btn btn-sm btn-primary text-white"
-                          >
-                            Request for Printing
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
+                filteredRequests.map((request, index) => (
+                  <tr key={request.id}>
+                    <th className="font-normal">{index + 1}</th>
+                    <td>{request.student_name}</td>
+                    <td>{request.grade_level}</td>
+                    <td>{request.section}</td>
+                    <td>
+                      <span className={`px-3 py-1 rounded-md text-xs font-medium ${
+                        request.status === "Pending" 
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-green-100 text-green-800"
+                      }`}>
+                        {request.status}
+                      </span>
+                    </td>
+                    <td>{new Date(request.created_at).toLocaleDateString()}</td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Add Request Modal */}
+        <dialog ref={modalRef} className="modal">
+          <div className="modal-box">
+            <form method="dialog">
+              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+                ✕
+              </button>
+            </form>
+            <h3 className="font-bold text-lg mb-4">Select Students</h3>
+            <div className="max-h-96 overflow-y-auto">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>LRN</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((student) => (
+                    <tr key={student.lrn}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedStudents.some(s => s.lrn === student.lrn)}
+                          onChange={() => handleStudentSelect(student)}
+                          className="checkbox"
+                        />
+                      </td>
+                      <td>{`${student.first_name} ${student.last_name}`}</td>
+                      <td>{student.lrn}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex justify-end gap-3 mt-5">
+              <button className="btn" onClick={() => modalRef.current.close()}>
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary text-white"
+                onClick={handleAddRequest}
+                disabled={selectedStudents.length === 0}
+              >
+                Submit Request
+              </button>
+            </div>
+          </div>
+        </dialog>
       </main>
     </div>
   );

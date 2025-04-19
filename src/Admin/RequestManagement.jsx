@@ -1,45 +1,41 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar.jsx";
 import * as XLSX from "xlsx";
 import { RiFileExcel2Fill } from "react-icons/ri";
+import supabase from "../Supabase.jsx";
 
 const RequestManagement = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [activeTab, setActiveTab] = useState("pending");
   const [searchQuery, setSearchQuery] = useState("");
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
   const modalRef = useRef(null);
   const acceptedModalRef = useRef(null);
 
-  const tableData = [
-    {
-      id: 1,
-      name: "Avery Thompson",
-      email: "avery@example.com",
-      createdAt: "04/17/2025",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      name: "Lucas Ramirez",
-      email: "lucas@example.com",
-      createdAt: "04/17/2025",
-      status: "Accepted",
-    },
-    {
-      id: 3,
-      name: "Samantha Blake",
-      email: "samantha@example.com",
-      createdAt: "04/17/2025",
-      status: "Pending",
-    },
-    {
-      id: 4,
-      name: "Natalie Cruz",
-      email: "natalie@example.com",
-      createdAt: "04/15/2025",
-      status: "Pending",
-    },
-  ];
+  // Fetch requests from Supabase
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("Request")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Error fetching requests:", error);
+        } else {
+          setRequests(data);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRequests();
+  }, []);
 
   const openModal = (item) => {
     setSelectedItem(item);
@@ -51,25 +47,76 @@ const RequestManagement = () => {
     acceptedModalRef.current?.showModal();
   };
 
-  const handleDecision = (decision) => {
-    console.log(`${decision} for ${selectedItem?.name}`);
+  const handleDecision = async (decision) => {
+    try {
+      const { error } = await supabase
+        .from("Request")
+        .update({ status: decision })
+        .eq("id", selectedItem.id);
+
+      if (error) {
+        console.error("Error updating request:", error);
+      } else {
+        // Refresh requests list
+        const { data: updatedRequests, error: fetchError } = await supabase
+          .from("Request")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (fetchError) {
+          console.error("Error fetching updated requests:", fetchError);
+        } else {
+          setRequests(updatedRequests);
+        }
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    }
+
     modalRef.current.close();
     setSelectedItem(null);
   };
 
-  const handleAcceptedDecision = (newStatus) => {
-    const updatedItem = { ...selectedItem, status: newStatus };
-    console.log(`Status updated for ${updatedItem?.name}: ${newStatus}`);
+  const handleAcceptedDecision = async (newStatus) => {
+    try {
+      const { error } = await supabase
+        .from("Request")
+        .update({ status: newStatus })
+        .eq("id", selectedItem.id);
+
+      if (error) {
+        console.error("Error updating request:", error);
+      } else {
+        // Refresh requests list
+        const { data: updatedRequests, error: fetchError } = await supabase
+          .from("Request")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (fetchError) {
+          console.error("Error fetching updated requests:", fetchError);
+        } else {
+          setRequests(updatedRequests);
+        }
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    }
+
     acceptedModalRef.current.close();
     setSelectedItem(null);
   };
 
   const handleSaveAsExcel = () => {
-    const filteredTableData = tableData
-      .filter((item) => item.status.toLowerCase() === activeTab)
-      .filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+    const filteredTableData = filteredData.map(item => ({
+      Name: item.student_name,
+      Grade: item.grade_level,
+      Section: item.section,
+      Status: item.status,
+      "Date Requested": new Date(item.created_at).toLocaleDateString(),
+      "School Year": item.school_year
+    }));
+
     const ws = XLSX.utils.json_to_sheet(filteredTableData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Requests");
@@ -77,11 +124,22 @@ const RequestManagement = () => {
   };
 
   // Filter data based on the active tab and search query
-  const filteredData = tableData
+  const filteredData = requests
     .filter((item) => item.status.toLowerCase() === activeTab)
     .filter((item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      item.student_name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+  if (loading) {
+    return (
+      <div className="bg-gray-100 flex min-h-screen">
+        <AdminSidebar />
+        <main className="flex-1 p-6 lg:ml-64 flex items-center justify-center">
+          <span className="loading loading-spinner loading-lg"></span>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-100 flex min-h-screen">
@@ -145,9 +203,11 @@ const RequestManagement = () => {
               <tr>
                 <th>#</th>
                 <th>Name</th>
-                <th>Email</th>
+                <th>Grade</th>
+                <th>Section</th>
                 <th>Status</th>
-                <th>Created At</th>
+                <th>Date Requested</th>
+                <th>School Year</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -156,8 +216,9 @@ const RequestManagement = () => {
                 filteredData.map((item, index) => (
                   <tr key={item.id}>
                     <th>{index + 1}</th>
-                    <td>{item.name}</td>
-                    <td>{item.email}</td>
+                    <td>{item.student_name}</td>
+                    <td>{item.grade_level}</td>
+                    <td>{item.section}</td>
                     <td
                       className={`font-bold ${
                         item.status === "Pending"
@@ -169,7 +230,8 @@ const RequestManagement = () => {
                     >
                       {item.status}
                     </td>
-                    <td>{item.createdAt}</td>
+                    <td>{new Date(item.created_at).toLocaleDateString()}</td>
+                    <td>{item.school_year}</td>
                     <td>
                       <button
                         className="btn btn-sm btn-info btn-outline hover:text-white"
@@ -186,7 +248,7 @@ const RequestManagement = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="text-center text-gray-500">
+                  <td colSpan="8" className="text-center text-gray-500">
                     No records found.
                   </td>
                 </tr>
@@ -204,7 +266,7 @@ const RequestManagement = () => {
               </button>
             </form>
             <h3 className="font-bold text-lg mb-2">
-              Manage Request for {selectedItem?.name}
+              Manage Request for {selectedItem?.student_name}
             </h3>
             <p className="mb-10 mt-5">
               Do you want to accept or reject this request?
@@ -235,7 +297,7 @@ const RequestManagement = () => {
               </button>
             </form>
             <h3 className="font-bold text-lg mb-2">
-              Edit Request for {selectedItem?.name}
+              Edit Request for {selectedItem?.student_name}
             </h3>
             <p className="mb-10 mt-5">
               You can change the status of this request from Accepted to

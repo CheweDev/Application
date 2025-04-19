@@ -2,12 +2,25 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import UserSidebar from "./UserSidebar";
 import { IoArrowBack } from "react-icons/io5";
+import supabase from "../Supabase";
+import CryptoJS from "crypto-js";
 
 const quarters = ["1st Quarter", "2nd Quarter", "3rd Quarter", "4th Quarter"];
 
+const ENCRYPTION_KEY = "your-secure-key";
+
+const encryptData = (data) => {
+  return CryptoJS.AES.encrypt(data.toString(), ENCRYPTION_KEY).toString();
+};
+
+const decryptData = (cipherText) => {
+  const bytes = CryptoJS.AES.decrypt(cipherText, ENCRYPTION_KEY);
+  return bytes.toString(CryptoJS.enc.Utf8);
+};
+
 const UserStudentGrade = () => {
   const location = useLocation();
-  const { lrn, gradeLevel } = location.state || {};
+  const { lrn, gradeLevel, name } = location.state || {};
   const modalRef = useRef(null);
   const [grades, setGrades] = useState([]);
   const [formData, setFormData] = useState({
@@ -33,13 +46,57 @@ const UserStudentGrade = () => {
   });
   const [selectedCard, setSelectedCard] = useState(null);
 
-  // Load grades from localStorage on component mount
+  // Fetch grades from Supabase
   useEffect(() => {
-    if (lrn && gradeLevel) {
-      const storedGrades = localStorage.getItem(`grades-${lrn}-${gradeLevel}`);
-      if (storedGrades) {
-        setGrades(JSON.parse(storedGrades));
+    const fetchGrades = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("Grades")
+          .select("*")
+          .eq("lrn", lrn)
+          .eq("grade_level", gradeLevel);
+
+        if (error) {
+          console.error("Error fetching grades:", error);
+        } else {
+          // Decrypt grades before setting them
+          const decryptedGrades = data.map((grade) => {
+            const decryptedGrade = { ...grade };
+            Object.keys(decryptedGrade).forEach((key) => {
+              if (
+                [
+                  "mother_tongue",
+                  "filipino",
+                  "english",
+                  "math",
+                  "science",
+                  "ap",
+                  "epp_tle",
+                  "mapeh",
+                  "music",
+                  "arts",
+                  "pe",
+                  "health",
+                  "ep",
+                  "arabic",
+                  "islamic",
+                  "average",
+                ].includes(key)
+              ) {
+                decryptedGrade[key] = decryptData(decryptedGrade[key]);
+              }
+            });
+            return decryptedGrade;
+          });
+          setGrades(decryptedGrades);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
       }
+    };
+
+    if (lrn && gradeLevel) {
+      fetchGrades();
     }
   }, [lrn, gradeLevel]);
 
@@ -52,7 +109,7 @@ const UserStudentGrade = () => {
     if (quarter) {
       const selected = grades.find((g) => g.quarter === quarter);
       if (selected) {
-        setFormData(selected); // Populate formData with the selected grade's data
+        setFormData(selected);
       } else {
         setFormData({
           lrn: lrn || "",
@@ -104,55 +161,159 @@ const UserStudentGrade = () => {
     modalRef.current?.showModal();
   };
 
-  const handleSubmit = () => {
-    const updatedGrades = [...grades];
+  const handleSubmit = async () => {
+    try {
+      // Encrypt formData before sending to Supabase
+      const encryptedFormData = { ...formData };
+      Object.keys(encryptedFormData).forEach((key) => {
+        if (
+          [
+            "mother_tongue",
+            "filipino",
+            "english",
+            "math",
+            "science",
+            "ap",
+            "epp_tle",
+            "mapeh",
+            "music",
+            "arts",
+            "pe",
+            "health",
+            "ep",
+            "arabic",
+            "islamic",
+            "average",
+          ].includes(key)
+        ) {
+          encryptedFormData[key] = encryptData(encryptedFormData[key]);
+        }
+      });
 
-    if (selectedCard) {
-      // Update existing grade
-      const index = updatedGrades.findIndex(
-        (g) => g.quarter === formData.quarter
-      );
-      if (index !== -1) {
-        updatedGrades[index] = { ...formData, id: Date.now() };
+      if (formData.id) {
+        // Update existing grade using the id
+        const { error } = await supabase
+          .from("Grades")
+          .update(encryptedFormData)
+          .eq("id", formData.id);
+
+        if (error) {
+          console.error("Error updating grade:", error);
+        } else {
+          // Refresh the grades list after successful update
+          const { data: updatedGrades, error: fetchError } = await supabase
+            .from("Grades")
+            .select("*")
+            .eq("lrn", lrn)
+            .eq("grade_level", gradeLevel);
+
+          if (fetchError) {
+            console.error("Error fetching updated grades:", fetchError);
+          } else {
+            setGrades(
+              updatedGrades.map((grade) => {
+                const decryptedGrade = { ...grade };
+                Object.keys(decryptedGrade).forEach((key) => {
+                  if (
+                    [
+                      "mother_tongue",
+                      "filipino",
+                      "english",
+                      "math",
+                      "science",
+                      "ap",
+                      "epp_tle",
+                      "mapeh",
+                      "music",
+                      "arts",
+                      "pe",
+                      "health",
+                      "ep",
+                      "arabic",
+                      "islamic",
+                      "average",
+                    ].includes(key)
+                  ) {
+                    decryptedGrade[key] = decryptData(decryptedGrade[key]);
+                  }
+                });
+                return decryptedGrade;
+              })
+            );
+          }
+        }
       } else {
-        updatedGrades.push({ ...formData, id: Date.now() });
-      }
-    } else {
-      // Check if the quarter already exists
-      const existingIndex = updatedGrades.findIndex(
-        (g) => g.quarter === formData.quarter
-      );
-      if (existingIndex !== -1) {
-        updatedGrades[existingIndex] = { ...formData, id: Date.now() };
-      } else {
-        // Add new grade
-        updatedGrades.push({ ...formData, id: Date.now() });
-      }
-    }
+        // Insert new grade
+        const { error } = await supabase.from("Grades").insert([encryptedFormData]);
 
-    setGrades(updatedGrades);
+        if (error) {
+          console.error("Error inserting grade:", error);
+        } else {
+          const { data: updatedGrades, error: fetchError } = await supabase
+            .from("Grades")
+            .select("*")
+            .eq("lrn", lrn)
+            .eq("grade_level", gradeLevel);
 
-    // Save to localStorage
-    if (lrn && gradeLevel) {
-      localStorage.setItem(
-        `grades-${lrn}-${gradeLevel}`,
-        JSON.stringify(updatedGrades)
-      );
+          if (fetchError) {
+            console.error("Error fetching updated grades:", fetchError);
+          } else {
+            setGrades(
+              updatedGrades.map((grade) => {
+                const decryptedGrade = { ...grade };
+                Object.keys(decryptedGrade).forEach((key) => {
+                  if (
+                    [
+                      "mother_tongue",
+                      "filipino",
+                      "english",
+                      "math",
+                      "science",
+                      "ap",
+                      "epp_tle",
+                      "mapeh",
+                      "music",
+                      "arts",
+                      "pe",
+                      "health",
+                      "ep",
+                      "arabic",
+                      "islamic",
+                      "average",
+                    ].includes(key)
+                  ) {
+                    decryptedGrade[key] = decryptData(decryptedGrade[key]);
+                  }
+                });
+                return decryptedGrade;
+              })
+            );
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
     }
 
     modalRef.current.close();
   };
 
-  const handleDelete = () => {
-    const updatedGrades = grades.filter((g) => g.quarter !== formData.quarter);
-    setGrades(updatedGrades);
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from("Grades")
+        .delete()
+        .eq("lrn", lrn)
+        .eq("grade_level", gradeLevel)
+        .eq("quarter", formData.quarter);
 
-    // Update localStorage
-    if (lrn && gradeLevel) {
-      localStorage.setItem(
-        `grades-${lrn}-${gradeLevel}`,
-        JSON.stringify(updatedGrades)
-      );
+      if (error) {
+        console.error("Error deleting grade:", error);
+      } else {
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
     }
 
     modalRef.current.close();
@@ -170,7 +331,7 @@ const UserStudentGrade = () => {
             >
               <IoArrowBack size={24} />
             </button>
-            <h1 className="text-2xl">Add Grades for [name]</h1>
+            <h1 className="text-2xl">Add Grades for {name}</h1>
           </div>
           <div className="flex gap-2">
             <button
