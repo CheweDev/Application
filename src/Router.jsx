@@ -6,6 +6,7 @@ import RequestManagement from "./Admin/RequestManagement.jsx";
 import AccountManagement from "./Admin/AccountManagement.jsx";
 import AcademicRecords from "./Admin/AcademicRecords.jsx";
 import StudentGrade from "./Admin/StudentGrade.jsx";
+import SF10Template from "./Admin/SF10Template.jsx";
 
 const Router = () => {
   return (
