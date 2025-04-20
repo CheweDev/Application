@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar.jsx";
 import * as XLSX from "xlsx";
 import supabase from "../Supabase.jsx";
+import { RiFileExcel2Fill } from "react-icons/ri";
 
 const UserManagement = () => {
   const [usersData, setUsersData] = useState([]);
@@ -98,6 +99,7 @@ const UserManagement = () => {
               className="btn btn-success text-white"
               onClick={handleSaveAsExcel}
             >
+              <RiFileExcel2Fill />
               Save as Excel
             </button>
           </div>

@@ -1,13 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import AdminSidebar from "./AdminSidebar";
+import UserSidebar from "./UserSidebar";
 import { IoArrowBack } from "react-icons/io5";
-import supabase from "../Supabase";
-import { IoMdPrint } from "react-icons/io";
 
 const quarters = ["1st Quarter", "2nd Quarter", "3rd Quarter", "4th Quarter"];
 
-const StudentGrade = () => {
+const UserStudentGrade = () => {
   const location = useLocation();
   const { lrn, gradeLevel } = location.state || {};
   const modalRef = useRef(null);
@@ -35,28 +33,13 @@ const StudentGrade = () => {
   });
   const [selectedCard, setSelectedCard] = useState(null);
 
-  // Fetch grades from Supabase
+  // Load grades from localStorage on component mount
   useEffect(() => {
-    const fetchGrades = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("Grades")
-          .select("*")
-          .eq("lrn", lrn)
-          .eq("grade_level", gradeLevel);
-
-        if (error) {
-          console.error("Error fetching grades:", error);
-        } else {
-          setGrades(data);
-        }
-      } catch (err) {
-        console.error("Unexpected error:", err);
-      }
-    };
-
     if (lrn && gradeLevel) {
-      fetchGrades();
+      const storedGrades = localStorage.getItem(`grades-${lrn}-${gradeLevel}`);
+      if (storedGrades) {
+        setGrades(JSON.parse(storedGrades));
+      }
     }
   }, [lrn, gradeLevel]);
 
@@ -120,86 +103,64 @@ const StudentGrade = () => {
     }
     modalRef.current?.showModal();
   };
-  const handleSubmit = async () => {
-    try {
-      if (formData.id) {
-        // Update existing grade using the id
-        const { error } = await supabase
-          .from("Grades")
-          .update(formData)
-          .eq("id", formData.id);
 
-        if (error) {
-          console.error("Error updating grade:", error);
-        } else {
-          // Refresh the grades list after successful update
-          const { data: updatedGrades, error: fetchError } = await supabase
-            .from("Grades")
-            .select("*")
-            .eq("lrn", lrn)
-            .eq("grade_level", gradeLevel);
+  const handleSubmit = () => {
+    const updatedGrades = [...grades];
 
-          if (fetchError) {
-            console.error("Error fetching updated grades:", fetchError);
-          } else {
-            setGrades(updatedGrades);
-          }
-        }
+    if (selectedCard) {
+      // Update existing grade
+      const index = updatedGrades.findIndex(
+        (g) => g.quarter === formData.quarter
+      );
+      if (index !== -1) {
+        updatedGrades[index] = { ...formData, id: Date.now() };
       } else {
-        // Insert new grade
-        const { error } = await supabase.from("Grades").insert([formData]);
-
-        if (error) {
-          console.error("Error inserting grade:", error);
-        } else {
-          // Refresh the grades list after successful insert
-          const { data: updatedGrades, error: fetchError } = await supabase
-            .from("Grades")
-            .select("*")
-            .eq("lrn", lrn)
-            .eq("grade_level", gradeLevel);
-
-          if (fetchError) {
-            console.error("Error fetching updated grades:", fetchError);
-          } else {
-            setGrades(updatedGrades);
-          }
-        }
+        updatedGrades.push({ ...formData, id: Date.now() });
       }
-    } catch (err) {
-      console.error("Unexpected error:", err);
+    } else {
+      // Check if the quarter already exists
+      const existingIndex = updatedGrades.findIndex(
+        (g) => g.quarter === formData.quarter
+      );
+      if (existingIndex !== -1) {
+        updatedGrades[existingIndex] = { ...formData, id: Date.now() };
+      } else {
+        // Add new grade
+        updatedGrades.push({ ...formData, id: Date.now() });
+      }
     }
 
-    modalRef.current.close();
-  };
-  const handleDelete = async () => {
-    try {
-      const { error } = await supabase
-        .from("Grades")
-        .delete()
-        .eq("lrn", lrn)
-        .eq("grade_level", gradeLevel)
-        .eq("quarter", formData.quarter);
+    setGrades(updatedGrades);
 
-      if (error) {
-        console.error("Error deleting grade:", error);
-      } else {
-        window.location.reload(); // Refresh the page to reflect changes
-      }
-    } catch (err) {
-      console.error("Unexpected error:", err);
+    // Save to localStorage
+    if (lrn && gradeLevel) {
+      localStorage.setItem(
+        `grades-${lrn}-${gradeLevel}`,
+        JSON.stringify(updatedGrades)
+      );
     }
 
     modalRef.current.close();
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handleDelete = () => {
+    const updatedGrades = grades.filter((g) => g.quarter !== formData.quarter);
+    setGrades(updatedGrades);
+
+    // Update localStorage
+    if (lrn && gradeLevel) {
+      localStorage.setItem(
+        `grades-${lrn}-${gradeLevel}`,
+        JSON.stringify(updatedGrades)
+      );
+    }
+
+    modalRef.current.close();
   };
 
   return (
     <div className="bg-gray-100 flex min-h-screen">
-      <AdminSidebar />
+      <UserSidebar />
       <main className="flex-1 p-6 lg:ml-64">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2">
@@ -217,10 +178,6 @@ const StudentGrade = () => {
               onClick={() => handleOpenModal()}
             >
               + Add Grades
-            </button>
-            <button className="btn bg-gray-300" onClick={handlePrint}>
-              <IoMdPrint />
-              Print
             </button>
           </div>
         </div>
@@ -334,4 +291,4 @@ const StudentGrade = () => {
   );
 };
 
-export default StudentGrade;
+export default UserStudentGrade;

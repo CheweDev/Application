@@ -119,7 +119,7 @@ const AdminDashboard = () => {
         <div className="mt-5 flex flex-wrap justify-between items-end gap-4">
           {/* Remarks Filter */}
           <div>
-            <label className="block font-medium text-gray-700 mb-1">
+            <label className="block text-sm text-gray-700 mb-1">
               Filter by Remarks:
             </label>
             <select
@@ -139,7 +139,7 @@ const AdminDashboard = () => {
           <div className="flex gap-4 flex-wrap">
             {/* Date Filter */}
             <div>
-              <label className="block font-medium text-gray-700 mb-1">
+              <label className="block text-sm text-gray-700 mb-1">
                 Filter by Date:
               </label>
               <select
@@ -158,7 +158,7 @@ const AdminDashboard = () => {
 
             {/* School Year Filter */}
             <div>
-              <label className="block font-medium text-gray-700 mb-1">
+              <label className="block text-sm text-gray-700 mb-1">
                 Filter by School Year:
               </label>
               <select

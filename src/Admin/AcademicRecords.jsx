@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar.jsx";
 import * as XLSX from "xlsx";
 import supabase from "../Supabase.jsx";
+import { RiFileExcel2Fill } from "react-icons/ri";
+
 const AcademicRecords = () => {
   const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,7 +63,15 @@ const AcademicRecords = () => {
   };
 
   const handleSubmit = async () => {
-    const { last_name, first_name, middle_name, lrn, birthdate, sex, gradeLevel } = formData;
+    const {
+      last_name,
+      first_name,
+      middle_name,
+      lrn,
+      birthdate,
+      sex,
+      gradeLevel,
+    } = formData;
 
     if (selectedStudent) {
       // Update student in Supabase
@@ -167,6 +177,7 @@ const AcademicRecords = () => {
               className="btn btn-success text-white"
               onClick={handleSaveAsExcel}
             >
+              <RiFileExcel2Fill />
               Save as Excel
             </button>
           </div>
@@ -204,7 +215,7 @@ const AcademicRecords = () => {
                         className="btn btn-sm btn-outline btn-info hover:text-white"
                         onClick={() => handleOpenModal(student)}
                       >
-                        Edit
+                        Edit Info
                       </button>
                       <Link
                         to={{

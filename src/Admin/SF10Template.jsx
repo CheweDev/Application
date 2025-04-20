@@ -7,7 +7,7 @@ const mockStudentData = {
   lastName: "Santos",
   firstName: "Juan",
   nameExtn: "Jr.",
-  middleName: "Dela Cruz",
+  middleName: "Laguna",
   lrn: "136428170048",
   birthdate: "2010-05-15",
   sex: "Male",
@@ -530,9 +530,9 @@ const SF10Template = () => {
       <div className="border border-black p-2" ref={formRef}>
         <div className="header-section">
           <div className="flex justify-between items-start mb-2">
-            <div className="w-16 h-16 border border-gray-300 flex items-center justify-center">
+            <div className="w-20 h-20 border border-gray-300 flex items-center justify-center">
               <img
-                src="/placeholder.svg?height=64&width=64"
+                src="educ-logo.jpg"
                 alt="DepEd Logo"
                 width={64}
                 height={64}
@@ -541,14 +541,14 @@ const SF10Template = () => {
             </div>
 
             {/* Center Text */}
-            <div className="text-center flex-1 px-4">
-              <p className="font-bold">Republic of the Philippines</p>
-              <p className="font-bold">Department of Education</p>
+            <div className="text-center flex-1">
+              <p className="font-bold text-lg">Republic of the Philippines</p>
+              <p className="font-bold text-lg">Department of Education</p>
             </div>
 
-            <div className="w-16 h-16 border border-gray-300 flex items-center justify-center">
+            <div className="w-20 h-20 border border-gray-300 flex items-center justify-center">
               <img
-                src="/placeholder.svg?height=64&width=64"
+                src="deped.jpg"
                 alt="Philippine Seal"
                 width={64}
                 height={64}
@@ -567,32 +567,40 @@ const SF10Template = () => {
 
         {/* Personal Information Section */}
         <div className="personal-info-section mt-4">
-          <h3 className="font-bold border-t border-b border-black py-1 px-2 bg-gray-200">
+          <h3 className="font-bold border-t border-b border-black py-1 px-2 bg-gray-300 text-center">
             LEARNER'S PERSONAL INFORMATION
           </h3>
           <div className="grid grid-cols-12 gap-1 mt-2">
-            <div className="col-span-4 border-b border-black">
+            <div className="col-span-4">
               <div className="flex">
                 <span className="font-bold mr-1">LAST NAME:</span>
-                <span className="flex-1">{mockStudentData.lastName}</span>
+                <span className="flex-1 border-b">
+                  {mockStudentData.lastName}
+                </span>
               </div>
             </div>
-            <div className="col-span-4 border-b border-black">
+            <div className="col-span-4">
               <div className="flex">
                 <span className="font-bold mr-1">FIRST NAME:</span>
-                <span className="flex-1">{mockStudentData.firstName}</span>
+                <span className="flex-1 border-b">
+                  {mockStudentData.firstName}
+                </span>
               </div>
             </div>
-            <div className="col-span-2 border-b border-black">
+            <div className="col-span-2">
               <div className="flex">
                 <span className="font-bold mr-1">NAME EXTN. (Jr,I,II)</span>
-                <span className="flex-1">{mockStudentData.nameExtn}</span>
+                <span className="flex-1 border-b">
+                  {mockStudentData.nameExtn}
+                </span>
               </div>
             </div>
-            <div className="col-span-2 border-b border-black">
+            <div className="col-span-2">
               <div className="flex">
                 <span className="font-bold mr-1">MIDDLE NAME:</span>
-                <span className="flex-1">{mockStudentData.middleName}</span>
+                <span className="flex-1 border-b">
+                  {mockStudentData.middleName}
+                </span>
               </div>
             </div>
           </div>
@@ -629,15 +637,15 @@ const SF10Template = () => {
 
         {/* Eligibility Section */}
         <div className="eligibility-section mt-4">
-          <h3 className="font-bold border-t border-b border-black py-1 px-2 bg-gray-200">
+          <h3 className="font-bold border-t border-b border-black py-1 px-2 bg-gray-300 text-center">
             ELIGIBILITY FOR ELEMENTARY SCHOOL ENROLMENT
           </h3>
           <div className="grid grid-cols-12 gap-1 mt-2">
             <div className="col-span-12">
-              <span className="font-bold mr-1">
-                Credential Presented for Grade 1:
-              </span>
-              <div className="flex space-x-4 mt-1">
+              <div className="flex space-x-4">
+                <span className="font-bold mr-1">
+                  Credential Presented for Grade 1:
+                </span>
                 <label className="flex items-center">
                   <input
                     type="checkbox"
@@ -674,8 +682,8 @@ const SF10Template = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-12 gap-1 mt-2">
-            <div className="col-span-6">
+          <div className="grid grid-cols-12 gap-1 mt-2 border-b">
+            <div className="col-span-4">
               <div className="flex">
                 <span className="font-bold mr-1">Name of School:</span>
                 <span className="flex-1 border-b border-black">
@@ -683,7 +691,7 @@ const SF10Template = () => {
                 </span>
               </div>
             </div>
-            <div className="col-span-3">
+            <div className="col-span-2">
               <div className="flex">
                 <span className="font-bold mr-1">School ID:</span>
                 <span className="flex-1 border-b border-black">
@@ -691,7 +699,7 @@ const SF10Template = () => {
                 </span>
               </div>
             </div>
-            <div className="col-span-3">
+            <div className="col-span-6">
               <div className="flex">
                 <span className="font-bold mr-1">Address of School:</span>
                 <span className="flex-1 border-b border-black">
@@ -766,10 +774,9 @@ const SF10Template = () => {
 
         {/* Scholastic Record Section */}
         <div className="scholastic-record-section mt-4">
-          <h3 className="font-bold border-t border-b border-black py-1 px-2 bg-gray-200">
+          <h3 className="font-bold border-t border-b border-black py-1 px-2 bg-gray-300 text-center">
             SCHOLASTIC RECORD
           </h3>
-
           {/* School Records */}
           <div className="grid grid-cols-2 gap-2 mt-2">
             {mockStudentData.scholasticRecords
@@ -814,107 +821,90 @@ const SchoolRecordTable = ({ record, index }) => {
       className={`school-record-table border border-black p-1`}
       id={`school-record-${index}`}
     >
-      <div className="grid grid-cols-12 gap-1">
-        <div className="col-span-12">
-          <div className="flex">
+      <div className="grid grid-cols-12 gap-4 mb-2">
+        <div className="col-span-8">
+          <div className="flex items-center">
             <span className="font-bold mr-1">School:</span>
-            <span className="flex-1 border-b border-black">
+            <span className="border-b border-black flex-1">
               {record.school}
             </span>
           </div>
         </div>
-      </div>
-
-      <div className="grid grid-cols-12 gap-1 mt-1">
         <div className="col-span-4">
-          <div className="flex">
-            <span className="font-bold mr-1">District:</span>
-            <span className="flex-1 border-b border-black">
-              {record.district}
-            </span>
-          </div>
-        </div>
-        <div className="col-span-8">
-          <div className="flex">
-            <span className="font-bold mr-1">Division:</span>
-            <span className="flex-1 border-b border-black">
-              {record.division}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-12 gap-1 mt-1">
-        <div className="col-span-6">
-          <div className="flex">
-            <span className="font-bold mr-1">Classified as Grade:</span>
-            <span className="w-8 border-b border-black">{record.grade}</span>
-          </div>
-        </div>
-        <div className="col-span-6">
-          <div className="flex">
-            <span className="font-bold mr-1">Section:</span>
-            <span className="flex-1 border-b border-black">
-              {record.section}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-12 gap-1 mt-1">
-        <div className="col-span-12">
-          <div className="flex">
-            <span className="font-bold mr-1">Name of Adviser/Teacher:</span>
-            <span className="flex-1 border-b border-black">
-              {record.adviser}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-12 gap-1 mt-1">
-        <div className="col-span-3 text-center">
-          <div className="flex justify-around">
-            <span>1</span>
-            <span>2</span>
-            <span>3</span>
-            <span>4</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-12 gap-1 mt-1">
-        <div className="col-span-6">
-          <div className="flex">
+          <div className="flex items-center">
             <span className="font-bold mr-1">School ID:</span>
-            <span className="flex-1 border-b border-black">
+            <span className="border-b border-black flex-1">
               {record.schoolId}
             </span>
           </div>
         </div>
-        <div className="col-span-6">
-          <div className="flex">
+      </div>
+
+      <div className="grid grid-cols-12 gap-4 mb-2">
+        <div className="col-span-4">
+          <div className="flex items-center">
+            <span className="font-bold mr-1">District:</span>
+            <span className="border-b border-black flex-1">
+              {record.district}
+            </span>
+          </div>
+        </div>
+        <div className="col-span-4">
+          <div className="flex items-center">
+            <span className="font-bold mr-1">Division:</span>
+            <span className="border-b border-black flex-1">
+              {record.division}
+            </span>
+          </div>
+        </div>
+        <div className="col-span-4">
+          <div className="flex items-center">
+            <span className="font-bold mr-1">Region:</span>
+            <span className="border-b border-black flex-1">
+              {record.region}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-12 gap-4 mb-2">
+        <div className="col-span-4">
+          <div className="flex items-center">
+            <span className="font-bold mr-1">Classified as Grade:</span>
+            <span className="border-b border-black w-12">{record.grade}</span>
+          </div>
+        </div>
+        <div className="col-span-4">
+          <div className="flex items-center">
+            <span className="font-bold mr-1">Section:</span>
+            <span className="border-b border-black flex-1">
+              {record.section}
+            </span>
+          </div>
+        </div>
+        <div className="col-span-4">
+          <div className="flex items-center">
             <span className="font-bold mr-1">School Year:</span>
-            <span className="flex-1 border-b border-black">
+            <span className="border-b border-black flex-1">
               {record.schoolYear}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-1 mt-1">
-        <div className="col-span-6">
-          <div className="flex">
-            <span className="font-bold mr-1">Region:</span>
-            <span className="flex-1 border-b border-black">
-              {record.region}
+      <div className="grid grid-cols-12 gap-4">
+        <div className="col-span-8">
+          <div className="flex items-center">
+            <span className="font-bold mr-1">Name of Adviser/Teacher:</span>
+            <span className="border-b border-black flex-1">
+              {record.adviser}
             </span>
           </div>
         </div>
-        <div className="col-span-6">
-          <div className="flex">
+        <div className="col-span-4">
+          <div className="flex items-center">
             <span className="font-bold mr-1">Signature:</span>
-            <span className="flex-1 border-b border-black">
+            <span className="border-b border-black flex-1">
               {record.signature}
             </span>
           </div>
@@ -1064,91 +1054,74 @@ const EmptySchoolRecordTable = ({ index }) => {
       className={`school-record-table border border-black p-1`}
       id={`empty-school-record-${index}`}
     >
-      <div className="grid grid-cols-12 gap-1">
-        <div className="col-span-12">
-          <div className="flex">
-            <span className="font-bold mr-1">School:</span>
-            <span className="flex-1 border-b border-black"></span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-12 gap-1 mt-1">
-        <div className="col-span-4">
-          <div className="flex">
-            <span className="font-bold mr-1">District:</span>
-            <span className="flex-1 border-b border-black"></span>
-          </div>
-        </div>
+      <div className="grid grid-cols-12 gap-4 mb-2">
         <div className="col-span-8">
-          <div className="flex">
-            <span className="font-bold mr-1">Division:</span>
-            <span className="flex-1 border-b border-black"></span>
+          <div className="flex items-center">
+            <span className="font-bold mr-1">School:</span>
+            <span className="border-b border-black flex-1"></span>
           </div>
         </div>
-      </div>
-
-      <div className="grid grid-cols-12 gap-1 mt-1">
-        <div className="col-span-6">
-          <div className="flex">
-            <span className="font-bold mr-1">Classified as Grade:</span>
-            <span className="w-8 border-b border-black"></span>
-          </div>
-        </div>
-        <div className="col-span-6">
-          <div className="flex">
-            <span className="font-bold mr-1">Section:</span>
-            <span className="flex-1 border-b border-black"></span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-12 gap-1 mt-1">
-        <div className="col-span-12">
-          <div className="flex">
-            <span className="font-bold mr-1">Name of Adviser/Teacher:</span>
-            <span className="flex-1 border-b border-black"></span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-12 gap-1 mt-1">
-        <div className="col-span-3 text-center">
-          <div className="flex justify-around">
-            <span>1</span>
-            <span>2</span>
-            <span>3</span>
-            <span>4</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-12 gap-1 mt-1">
-        <div className="col-span-6">
-          <div className="flex">
+        <div className="col-span-4">
+          <div className="flex items-center">
             <span className="font-bold mr-1">School ID:</span>
-            <span className="flex-1 border-b border-black"></span>
-          </div>
-        </div>
-        <div className="col-span-6">
-          <div className="flex">
-            <span className="font-bold mr-1">School Year:</span>
-            <span className="flex-1 border-b border-black"></span>
+            <span className="border-b border-black flex-1"></span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-1 mt-1">
-        <div className="col-span-6">
-          <div className="flex">
-            <span className="font-bold mr-1">Region:</span>
-            <span className="flex-1 border-b border-black"></span>
+      <div className="grid grid-cols-12 gap-4 mb-2">
+        <div className="col-span-4">
+          <div className="flex items-center">
+            <span className="font-bold mr-1">District:</span>
+            <span className="border-b border-black flex-1"></span>
           </div>
         </div>
-        <div className="col-span-6">
-          <div className="flex">
+        <div className="col-span-4">
+          <div className="flex items-center">
+            <span className="font-bold mr-1">Division:</span>
+            <span className="border-b border-black flex-1"></span>
+          </div>
+        </div>
+        <div className="col-span-4">
+          <div className="flex items-center">
+            <span className="font-bold mr-1">Region:</span>
+            <span className="border-b border-black flex-1"></span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-12 gap-4 mb-2">
+        <div className="col-span-4">
+          <div className="flex items-center">
+            <span className="font-bold mr-1">Classified as Grade:</span>
+            <span className="border-b border-black w-12"></span>
+          </div>
+        </div>
+        <div className="col-span-4">
+          <div className="flex items-center">
+            <span className="font-bold mr-1">Section:</span>
+            <span className="border-b border-black flex-1"></span>
+          </div>
+        </div>
+        <div className="col-span-4">
+          <div className="flex items-center">
+            <span className="font-bold mr-1">School Year:</span>
+            <span className="border-b border-black flex-1"></span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-12 gap-4">
+        <div className="col-span-8">
+          <div className="flex items-center">
+            <span className="font-bold mr-1">Name of Adviser/Teacher:</span>
+            <span className="border-b border-black flex-1"></span>
+          </div>
+        </div>
+        <div className="col-span-4">
+          <div className="flex items-center">
             <span className="font-bold mr-1">Signature:</span>
-            <span className="flex-1 border-b border-black"></span>
+            <span className="border-b border-black flex-1"></span>
           </div>
         </div>
       </div>
@@ -1327,26 +1300,25 @@ const CertificationBox = ({ certification, index }) => {
         </div>
       </div>
 
-      <div className="mt-4 text-center">
-        <div className="border-t border-black pt-1 w-64 mx-auto">
-          <p>{certification.principalName}</p>
-          <p>Name of Principal/School Head over Printed Name</p>
-        </div>
-      </div>
-
-      <div className="mt-2 flex justify-between">
+      <div className="mt-4 flex justify-between">
         <div>
-          <p>Date</p>
           <span className="border-b border-black inline-block">
             {certification.date
               ? new Date(certification.date).toLocaleDateString()
               : ""}
           </span>
+          <p>Date</p>
         </div>
 
-        <div className="text-center">
+        <div className="mt-4 text-center">
+          <div className="border-black pt-1 w-64 mx-auto">
+            <p className="border-b">{certification.principalName}</p>
+            <p>Name of Principal/School Head over Printed Name</p>
+          </div>
+        </div>
+
+        <div className="text-center mt-13">
           <p>(Affix School Seal here)</p>
-          <div className="w-24 h-24 border border-dashed border-black mx-auto"></div>
         </div>
       </div>
     </div>
@@ -1398,21 +1370,21 @@ const EmptyCertificationBox = ({ index }) => {
         </div>
       </div>
 
-      <div className="mt-4 text-center">
-        <div className="border-t border-black pt-1 w-64 mx-auto">
-          <p>Name of Principal/School Head over Printed Name</p>
-        </div>
-      </div>
-
       <div className="mt-2 flex justify-between">
         <div>
+          <span className="border-b border-black inline-block">sample</span>
           <p>Date</p>
-          <span className="border-b border-black inline-block"></span>
         </div>
 
-        <div className="text-center">
+        <div className="mt-4 text-center">
+          <div className="border-black pt-1 w-64 mx-auto">
+            <p className="border-b"></p>
+            <p>Name of Principal/School Head over Printed Name</p>
+          </div>
+        </div>
+
+        <div className="text-center mt-13">
           <p>(Affix School Seal here)</p>
-          <div className="w-24 h-24 border border-dashed border-black mx-auto"></div>
         </div>
       </div>
     </div>

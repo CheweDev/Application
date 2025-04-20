@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import AdminSidebar from "./AdminSidebar.jsx";
 import * as XLSX from "xlsx";
+import { RiFileExcel2Fill } from "react-icons/ri";
 
 const RequestManagement = () => {
   const [selectedItem, setSelectedItem] = useState(null);
@@ -131,6 +132,7 @@ const RequestManagement = () => {
               className="btn btn-success text-white"
               onClick={handleSaveAsExcel}
             >
+              <RiFileExcel2Fill />
               Save as Excel
             </button>
           </div>
