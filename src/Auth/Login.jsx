@@ -28,23 +28,23 @@ const Login = () => {
         .eq("role", role)
         .single();
   
-      if (error) {
-        console.error("Error fetching data:", error);
-        openModal();
-      } else if (data.length === 0) {
-        console.log("Invalid credentials");
+      if (error || !data) {
+        console.error("Error fetching data or no data found:", error);
         openModal();
       } else {
-        if (data.status === 'Pending' || data.status === 'Blocked') {
+        const status = data.status?.trim().toLowerCase();
+        if (status === 'pending' || status === 'blocked') {
           openStatusModal();
+          return; // stop further execution if status is not allowed
         }
+  
         console.log("Login successful:", data);
-
-    
+        console.log(`${data.status}`);
+  
         sessionStorage.setItem('grade_level', data.grade_level || '');
         sessionStorage.setItem('name', data.name || '');
         sessionStorage.setItem('section', data.section || '');
-
+  
         if (role === "ADMIN") {
           navigate("/admin-dashboard");
         } else if (role === "TEACHER") {
@@ -57,6 +57,7 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+  
 
   const openModal = () => {
     const modal = document.getElementById("error_modal");
