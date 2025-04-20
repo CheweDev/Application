@@ -89,15 +89,15 @@ const SF10Template = () => {
             };
 
             const record = {
-              school: "",
-              district: "",
-              division: "",
+              school: " Magallanes Agusan Del Norte",
+              district: "Magallanes",
+              division: "Agusan Del Norte",
               grade: gradeLevel,
               section: firstRecord?.section || "",
               adviser: firstRecord?.adviser || "",
-              schoolId: "",
+              schoolId: "131485",
               schoolYear: firstRecord?.school_year || "",
-              region: "",
+              region: "Caraga",
               signature: firstRecord?.adviser_signature || "",
 
               grades: {

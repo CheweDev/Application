@@ -259,36 +259,7 @@ const StudentGrade = () => {
           if (fetchError) {
             console.error("Error fetching updated grades:", fetchError);
           } else {
-            setGrades(
-              updatedGrades.map((grade) => {
-                const decryptedGrade = { ...grade };
-                Object.keys(decryptedGrade).forEach((key) => {
-                  if (
-                    [
-                      "mother_tongue",
-                      "filipino",
-                      "english",
-                      "math",
-                      "science",
-                      "ap",
-                      "epp_tle",
-                      "mapeh",
-                      "music",
-                      "arts",
-                      "pe",
-                      "health",
-                      "ep",
-                      "arabic",
-                      "islamic",
-                      "average",
-                    ].includes(key)
-                  ) {
-                    decryptedGrade[key] = decryptData(decryptedGrade[key]);
-                  }
-                });
-                return decryptedGrade;
-              })
-            );
+    window.location.reload();
           }
         }
       }

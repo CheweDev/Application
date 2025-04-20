@@ -42,6 +42,7 @@ const Login = () => {
 
     
         sessionStorage.setItem('grade_level', data.grade_level || '');
+        sessionStorage.setItem('name', data.name || '');
         sessionStorage.setItem('section', data.section || '');
 
         if (role === "ADMIN") {

@@ -99,10 +99,7 @@ const AcademicRecords = () => {
         if (error) {
           console.error("Error updating student:", error);
         } else {
-          const updated = students.map((s) =>
-            s.lrn === selectedStudent.lrn ? { ...formData } : s
-          );
-          setStudents(updated);
+        window.location.reload(); 
         }
       } catch (err) {
         console.error("Unexpected error:", err);
@@ -126,7 +123,7 @@ const AcademicRecords = () => {
         if (error) {
           console.error("Error inserting student:", error);
         } else {
-          setStudents((prev) => [...prev, formData]);
+          window.location.reload();
         }
       } catch (err) {
         console.error("Unexpected error:", err);

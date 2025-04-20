@@ -3,11 +3,12 @@ import { useNavigate, useLocation, NavLink } from "react-router-dom";
 import { FiGrid, FiUser, FiMenu, FiX } from "react-icons/fi";
 import { FaBook, FaUsersCog } from "react-icons/fa";
 import { RiLogoutCircleLine } from "react-icons/ri";
-
+import { FaUser } from "react-icons/fa";
 const UserSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const name = sessionStorage.getItem("name") || "User";
 
   useEffect(() => {
     setIsSidebarOpen(false);
@@ -133,6 +134,10 @@ const UserSidebar = () => {
             </li>
           </ul>
         </nav>
+        <div className="flex items-start justify-start ml-4">
+        <FaUser className="mr-2" />
+        <p className="m-0">{name}</p>
+      </div>
 
         <div className="px-4 py-2 text-xs text-gray-500 border-t border-[#3c4a5c]">
           <p>©2025 Developed by BSIT 2025</p>
