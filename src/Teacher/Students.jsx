@@ -18,6 +18,7 @@ const Students = () => {
     sex: "Male",
     gradeLevel: "",
     section: "",
+    school_year: "",
   });
 
   const modalRef = useRef(null);
@@ -67,6 +68,7 @@ const Students = () => {
         sex: "Male",
         gradeLevel: "",
         section: "",
+        school_year: "",
       });
     }
     modalRef.current?.showModal();
@@ -82,6 +84,7 @@ const Students = () => {
       sex,
       gradeLevel,
       section,
+      school_year
     } = formData;
 
     if (selectedStudent) {
@@ -98,16 +101,14 @@ const Students = () => {
             sex,
             gradeLevel,
             section,
+            school_year,
           })
           .eq("lrn", selectedStudent.lrn);
 
         if (error) {
           console.error("Error updating student:", error);
         } else {
-          const updated = students.map((s) =>
-            s.lrn === selectedStudent.lrn ? { ...formData } : s
-          );
-          setStudents(updated);
+        window.location.reload();
         }
       } catch (err) {
         console.error("Unexpected error:", err);
@@ -125,6 +126,7 @@ const Students = () => {
             sex,
             gradeLevel,
             section,
+            school_year,
           },
         ]);
 
@@ -276,7 +278,7 @@ const Students = () => {
         value={formData.last_name}
         onChange={handleInputChange}
         className="input input-bordered w-full"
-        disabled={!!selectedStudent} // Disable if editing
+        disabled={!!selectedStudent} 
       />
       <input
         type="text"
@@ -285,7 +287,7 @@ const Students = () => {
         value={formData.first_name}
         onChange={handleInputChange}
         className="input input-bordered w-full"
-        disabled={!!selectedStudent} // Disable if editing
+        disabled={!!selectedStudent} 
       />
       <input
         type="text"
@@ -294,7 +296,7 @@ const Students = () => {
         value={formData.middle_name}
         onChange={handleInputChange}
         className="input input-bordered w-full"
-        disabled={!!selectedStudent} // Disable if editing
+        disabled={!!selectedStudent} 
       />
       <input
         type="text"
@@ -303,7 +305,7 @@ const Students = () => {
         value={formData.lrn}
         onChange={handleInputChange}
         className="input input-bordered w-full"
-        disabled // Always disabled
+        disabled={!!selectedStudent}
       />
       <input
         type="date"
@@ -311,14 +313,14 @@ const Students = () => {
         value={formData.birthdate}
         onChange={handleInputChange}
         className="input input-bordered w-full"
-        disabled={!!selectedStudent} // Disable if editing
+        disabled={!!selectedStudent} 
       />
       <select
         name="sex"
         value={formData.sex}
         onChange={handleInputChange}
         className="select select-bordered w-full"
-        disabled={!!selectedStudent} // Disable if editing
+        disabled={!!selectedStudent} 
       >
         <option value="Male">Male</option>
         <option value="Female">Female</option>
@@ -346,6 +348,15 @@ const Students = () => {
         value={formData.section}
         onChange={handleInputChange}
         className="input input-bordered w-full"
+      />
+       <input
+        type="text"
+        name="school_year"
+        placeholder="School Year (e.g., 2023-2024)"
+        value={formData.school_year}
+        onChange={handleInputChange}
+        className="input input-bordered w-full"
+        disabled={!!selectedStudent} 
       />
     </div>
 

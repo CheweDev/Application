@@ -135,8 +135,7 @@ const UserSidebar = () => {
           </ul>
         </nav>
         <div className="flex items-start justify-start ml-4">
-        <FaUser className="mr-2" />
-        <p className="m-0">{name}</p>
+        <p className="m-0">Login as : {name}</p>
       </div>
 
         <div className="px-4 py-2 text-xs text-gray-500 border-t border-[#3c4a5c]">
