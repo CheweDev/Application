@@ -216,7 +216,7 @@ const SF10Template = () => {
         const pdf = new jsPDF({
           orientation: "portrait",
           unit: "mm",
-          format: "letter",
+          format: [215.9, 330.2],
         });
 
         const margin = {
