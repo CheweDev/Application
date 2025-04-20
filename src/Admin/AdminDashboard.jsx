@@ -42,8 +42,9 @@ const AdminDashboard = () => {
         }
 
         const { data: teacherData, error: teacherError } = await supabase
-          .from("TeacherData")
-          .select("*");
+          .from("Users")
+          .select("*")
+          .eq("role", "TEACHER");
 
         if (teacherError) {
           console.error("Error fetching teachers:", teacherError);

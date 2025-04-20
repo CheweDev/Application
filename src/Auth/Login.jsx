@@ -25,7 +25,8 @@ const Login = () => {
         .select("*")
         .eq("email", email)
         .eq("password", password)
-        .eq("role", role);
+        .eq("role", role)
+        .single();
   
       if (error) {
         console.error("Error fetching data:", error);
@@ -34,14 +35,14 @@ const Login = () => {
         console.log("Invalid credentials");
         openModal();
       } else {
-        if (data[0].status === 'Blocked') {
-          throw new Error('Your account has been blocked. Please contact the administrator.');
+        if (data.status === 'Pending' || data.status === 'Blocked') {
+          openStatusModal();
         }
         console.log("Login successful:", data);
 
     
-        sessionStorage.setItem('grade_level', data[0].grade_level || '');
-        sessionStorage.setItem('section', data[0].section || '');
+        sessionStorage.setItem('grade_level', data.grade_level || '');
+        sessionStorage.setItem('section', data.section || '');
 
         if (role === "ADMIN") {
           navigate("/admin-dashboard");
@@ -51,7 +52,6 @@ const Login = () => {
       }
     } catch (err) {
       console.error("Unexpected error:", err);
-      openModal();
     } finally {
       setIsLoading(false);
     }
@@ -66,6 +66,20 @@ const Login = () => {
 
   const closeModal = () => {
     const modal = document.getElementById("error_modal");
+    if (modal) {
+      modal.close();
+    }
+  };
+
+  const openStatusModal = () => {
+    const modal = document.getElementById("status_modal");
+    if (modal) {
+      modal.showModal();
+    }
+  };
+
+  const closeStatusModal = () => {
+    const modal = document.getElementById("status_modal");
     if (modal) {
       modal.close();
     }
@@ -250,6 +264,23 @@ const Login = () => {
           </form>
           <h3 className="font-bold text-lg text-red-500">Login Failed</h3>
           <p className="py-4">Invalid email, password, or role. Please try again.</p>
+        </div>
+      </dialog>
+
+      <dialog id="status_modal" className="modal">
+        <div className="modal-box">
+          <form method="dialog">
+            <button
+              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+              onClick={closeStatusModal}
+            >
+              ✕
+            </button>
+          </form>
+          <h3 className="font-bold text-lg text-yellow-500">Account On Hold</h3>
+          <p className="py-4">
+            Your account is currently on hold. Please contact the administrator for assistance.
+          </p>
         </div>
       </dialog>
     </>

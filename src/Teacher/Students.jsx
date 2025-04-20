@@ -258,99 +258,110 @@ const Students = () => {
         </div>
 
         {/* Add/Edit Modal */}
-        <dialog id="student_modal" className="modal" ref={modalRef}>
-          <div className="modal-box">
-            <form method="dialog">
-              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-                ✕
-              </button>
-            </form>
-            <h3 className="font-bold text-lg mb-4 text-gray-800">
-              {selectedStudent ? "Edit Student" : "Add Student"}
-            </h3>
-            <div className="flex flex-col gap-3">
-              <input
-                type="text"
-                name="last_name"
-                placeholder="Last Name"
-                value={formData.last_name}
-                onChange={handleInputChange}
-                className="input input-bordered w-full"
-              />
-              <input
-                type="text"
-                name="first_name"
-                placeholder="First Name"
-                value={formData.first_name}
-                onChange={handleInputChange}
-                className="input input-bordered w-full"
-              />
-              <input
-                type="text"
-                name="middle_name"
-                placeholder="Middle Name"
-                value={formData.middle_name}
-                onChange={handleInputChange}
-                className="input input-bordered w-full"
-              />
-              <input
-                type="text"
-                name="lrn"
-                placeholder="LRN"
-                value={formData.lrn}
-                onChange={handleInputChange}
-                className="input input-bordered w-full"
-                disabled={selectedStudent !== null}
-              />
-              <input
-                type="date"
-                name="birthdate"
-                value={formData.birthdate}
-                onChange={handleInputChange}
-                className="input input-bordered w-full"
-              />
-              <select
-                name="sex"
-                value={formData.sex}
-                onChange={handleInputChange}
-                className="select select-bordered w-full"
-              >
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-              </select>
-              <input
-                type="text"
-                name="gradeLevel"
-                placeholder="Grade Level"
-                value={formData.gradeLevel}
-                onChange={handleInputChange}
-                className="input input-bordered w-full"
-                
-              />
-              <input
-                type="text"
-                name="section"
-                placeholder="Section"
-                value={formData.section}
-                onChange={handleInputChange}
-                className="input input-bordered w-full"
-              
-              />
-            </div>
+<dialog id="student_modal" className="modal" ref={modalRef}>
+  <div className="modal-box">
+    <form method="dialog">
+      <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+        ✕
+      </button>
+    </form>
+    <h3 className="font-bold text-lg mb-4 text-gray-800">
+      {selectedStudent ? "Edit Student" : "Add Student"}
+    </h3>
+    <div className="flex flex-col gap-3">
+      <input
+        type="text"
+        name="last_name"
+        placeholder="Last Name"
+        value={formData.last_name}
+        onChange={handleInputChange}
+        className="input input-bordered w-full"
+        disabled={!!selectedStudent} // Disable if editing
+      />
+      <input
+        type="text"
+        name="first_name"
+        placeholder="First Name"
+        value={formData.first_name}
+        onChange={handleInputChange}
+        className="input input-bordered w-full"
+        disabled={!!selectedStudent} // Disable if editing
+      />
+      <input
+        type="text"
+        name="middle_name"
+        placeholder="Middle Name"
+        value={formData.middle_name}
+        onChange={handleInputChange}
+        className="input input-bordered w-full"
+        disabled={!!selectedStudent} // Disable if editing
+      />
+      <input
+        type="text"
+        name="lrn"
+        placeholder="LRN"
+        value={formData.lrn}
+        onChange={handleInputChange}
+        className="input input-bordered w-full"
+        disabled // Always disabled
+      />
+      <input
+        type="date"
+        name="birthdate"
+        value={formData.birthdate}
+        onChange={handleInputChange}
+        className="input input-bordered w-full"
+        disabled={!!selectedStudent} // Disable if editing
+      />
+      <select
+        name="sex"
+        value={formData.sex}
+        onChange={handleInputChange}
+        className="select select-bordered w-full"
+        disabled={!!selectedStudent} // Disable if editing
+      >
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+      <select
+        name="gradeLevel"
+        value={formData.gradeLevel}
+        onChange={handleInputChange}
+        className="input input-bordered w-full"
+        required
+      >
+        <option value="">Select Grade Level</option>
+        <option value="Grade 1">Grade 1</option>
+        <option value="Grade 2">Grade 2</option>
+        <option value="Grade 3">Grade 3</option>
+        <option value="Grade 4">Grade 4</option>
+        <option value="Grade 5">Grade 5</option>
+        <option value="Grade 6">Grade 6</option>
+      </select>
 
-            <div className="flex justify-end gap-3 mt-5">
-              <button className="btn" onClick={() => modalRef.current.close()}>
-                Cancel
-              </button>
-              <button
-                className="btn btn-primary text-white"
-                onClick={handleSubmit}
-              >
-                {selectedStudent ? "Update" : "Add"}
-              </button>
-            </div>
-          </div>
-        </dialog>
+      <input
+        type="text"
+        name="section"
+        placeholder="Section"
+        value={formData.section}
+        onChange={handleInputChange}
+        className="input input-bordered w-full"
+      />
+    </div>
+
+    <div className="flex justify-end gap-3 mt-5">
+      <button className="btn" onClick={() => modalRef.current.close()}>
+        Cancel
+      </button>
+      <button
+        className="btn btn-primary text-white"
+        onClick={handleSubmit}
+      >
+        {selectedStudent ? "Update" : "Add"}
+      </button>
+    </div>
+  </div>
+</dialog>
       </main>
     </div>
   );

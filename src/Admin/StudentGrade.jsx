@@ -55,8 +55,7 @@ const StudentGrade = () => {
         const { data, error } = await supabase
           .from("Grades")
           .select("*")
-          .eq("lrn", lrn)
-          .eq("grade_level", gradeLevel);
+          .eq("lrn", lrn);
 
         if (error) {
           console.error("Error fetching grades:", error);

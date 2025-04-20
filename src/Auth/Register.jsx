@@ -31,7 +31,7 @@ const Register = () => {
 
     try {
       const { data, error } = await supabase.from("Users").insert([
-        { name, grade_level, email, password, role, section },
+        { name, grade_level, email, password, role, section, status: "Pending" },
       ]);
 
       if (error) {
@@ -135,16 +135,24 @@ const Register = () => {
             </div>
 
             <div className="mb-3">
-              <label className="input validator w-full">
-                <input
-                  type="text"
-                  placeholder="Grade Level - Ex. Grade 1"
-                  value={grade_level}
-                  onChange={(e) => setGradeLevel(e.target.value)}
-                  required
-                />
-              </label>
-            </div>
+            <label className="input validator w-full">
+              <select
+                value={grade_level}
+                onChange={(e) => setGradeLevel(e.target.value)}
+                required
+                className="w-full rounded"
+              >
+                <option value="">Select Grade Level</option>
+                <option value="Grade 1">Grade 1</option>
+                <option value="Grade 2">Grade 2</option>
+                <option value="Grade 3">Grade 3</option>
+                <option value="Grade 4">Grade 4</option>
+                <option value="Grade 5">Grade 5</option>
+                <option value="Grade 6">Grade 6</option>
+              </select>
+            </label>
+          </div>
+
 
             <div className="mb-3">
               <label className="input validator w-full">
