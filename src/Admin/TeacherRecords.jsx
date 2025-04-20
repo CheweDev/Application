@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 import supabase from "../Supabase.jsx";
 import { RiFileExcel2Fill } from "react-icons/ri";
 
-const AcademicRecords = () => {
+const TeacherRecords = () => {
   const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSchoolYear, setSelectedSchoolYear] = useState("");
@@ -27,7 +27,7 @@ const AcademicRecords = () => {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const { data, error } = await supabase.from("StudentData").select("*");
+        const { data, error } = await supabase.from("Users").select("*").eq("role", "TEACHER");
         if (error) {
           console.error("Error fetching students:", error);
         } else {
@@ -82,27 +82,17 @@ const AcademicRecords = () => {
     if (selectedStudent) {
       try {
         const { error } = await supabase
-          .from("StudentData")
+          .from("Users")
           .update({
-            last_name,
-            first_name,
-            middle_name,
-            lrn,
-            birthdate,
-            sex,
-            gradeLevel,
+            grade_level: gradeLevel,
             section,
-            school_year,
           })
-          .eq("lrn", selectedStudent.lrn);
+          .eq("id", selectedStudent.id);
 
         if (error) {
           console.error("Error updating student:", error);
         } else {
-          const updated = students.map((s) =>
-            s.lrn === selectedStudent.lrn ? { ...formData } : s
-          );
-          setStudents(updated);
+         window.location.reload();
         }
       } catch (err) {
         console.error("Unexpected error:", err);
@@ -163,10 +153,10 @@ const AcademicRecords = () => {
         <div className="flex justify-between mt-2">
           <div className="mb-5">
             <h1 className="text-2xl font-bold text-gray-800">
-              Student Management
+              Teacher Management
             </h1>
             <p className="text-gray-600">
-              Add, edit, and export student records.
+            Edit, and export teacher records.
             </p>
           </div>
           <div className="flex gap-2">
@@ -177,26 +167,6 @@ const AcademicRecords = () => {
     value={searchQuery}
     onChange={(e) => setSearchQuery(e.target.value)}
   />
-   <select
-    className="select select-bordered"
-    value={selectedSchoolYear} 
-    onChange={(e) => setSelectedSchoolYear(e.target.value)} 
-  >
-    <option value="">All School Years</option>
-    {Array.from(new Set(students.map((student) => student.school_year))).map(
-      (uniqueYear) => (
-        <option key={uniqueYear} value={uniqueYear}>
-          {uniqueYear}
-        </option>
-      )
-    )}
-  </select>
-  <button
-    className="btn btn-primary"
-    onClick={() => handleOpenModal()}
-  >
-    + Add Student
-  </button>
   <button
     className="btn btn-success text-white"
     onClick={handleSaveAsExcel}
@@ -212,14 +182,10 @@ const AcademicRecords = () => {
             <thead>
               <tr>
                 <th>#</th>
-                <th>Last Name</th>
-                <th>First Name</th>
-                <th>Middle Name</th>
-                <th>LRN</th>
-                <th>Birthdate</th>
-                <th>Sex</th>
+                <th>Name</th>
+                <th>Email</th>
                 <th>Grade Level</th>
-                <th>School Year</th>
+                <th>Section</th>
                 <th></th>
               </tr>
             </thead>
@@ -228,14 +194,10 @@ const AcademicRecords = () => {
                 filteredStudents.map((student, index) => (
                   <tr key={student.lrn}>
                     <th>{index + 1}</th>
-                    <td>{student.last_name}</td>
-                    <td>{student.first_name}</td>
-                    <td>{student.middle_name}</td>
-                    <td>{student.lrn}</td>
-                    <td>{student.birthdate}</td>
-                    <td>{student.sex}</td>
-                    <td>{student.gradeLevel}</td>
-                    <td>{student.school_year}</td>
+                    <td>{student.name}</td>
+                    <td>{student.email}</td>
+                    <td>{student.grade_level}</td>
+                    <td>{student.section}</td>
                     <td className="flex gap-2">
                     <button
                       className="btn btn-sm btn-outline btn-info hover:text-white"
@@ -243,34 +205,6 @@ const AcademicRecords = () => {
                     >
                       Edit Info
                     </button>
-                    <Link
-                      to={{
-                        pathname: "/student-grade",
-                      }}
-                      state={{
-                        lrn: student.lrn,
-                        gradeLevel: student.gradeLevel,
-                        name: `${student.first_name} ${student.last_name}`,
-                      }}
-                      className="btn btn-sm btn-outline btn-warning hover:text-white"
-                    >
-                      View Grades
-                    </Link>
-                    <Link
-                      to={{
-                        pathname: "/template",
-                      }}
-                      state={{
-                        lrn: student.lrn,
-                        gradeLevel: student.gradeLevel,
-                        name: `${student.first_name} ${student.last_name}`,
-                        birthdate: student.birthdate,
-                        sex: student.sex,
-                      }}
-                      className="btn btn-sm btn-outline btn-success hover:text-white"
-                    >
-                      Print
-                    </Link>
                   </td>
                   </tr>
                 ))
@@ -295,66 +229,12 @@ const AcademicRecords = () => {
       </button>
     </form>
     <h3 className="font-bold text-lg mb-4 text-gray-800">
-      {selectedStudent ? "Edit Student" : "Add Student"}
+      {selectedStudent ? "Edit Record" : "Add Student"}
     </h3>
     <div className="flex flex-col gap-3">
-      <input
-        type="text"
-        name="last_name"
-        placeholder="Last Name"
-        value={formData.last_name}
-        onChange={handleInputChange}
-        className="input input-bordered w-full"
-        disabled={!!selectedStudent} 
-      />
-      <input
-        type="text"
-        name="first_name"
-        placeholder="First Name"
-        value={formData.first_name}
-        onChange={handleInputChange}
-        className="input input-bordered w-full"
-        disabled={!!selectedStudent} 
-      />
-      <input
-        type="text"
-        name="middle_name"
-        placeholder="Middle Name"
-        value={formData.middle_name}
-        onChange={handleInputChange}
-        className="input input-bordered w-full"
-        disabled={!!selectedStudent} 
-      />
-      <input
-        type="text"
-        name="lrn"
-        placeholder="LRN"
-        value={formData.lrn}
-        onChange={handleInputChange}
-        className="input input-bordered w-full"
-        disabled 
-      />
-      <input
-        type="date"
-        name="birthdate"
-        value={formData.birthdate}
-        onChange={handleInputChange}
-        className="input input-bordered w-full"
-        disabled={!!selectedStudent}
-      />
-      <select
-        name="sex"
-        value={formData.sex}
-        onChange={handleInputChange}
-        className="select select-bordered w-full"
-        disabled={!!selectedStudent} 
-      >
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-      </select>
       <select
         name="gradeLevel"
-        value={formData.gradeLevel}
+        value={formData.grade_level}
         onChange={handleInputChange}
         className="select select-bordered w-full"
       >
@@ -372,15 +252,6 @@ const AcademicRecords = () => {
         value={formData.section}
         onChange={handleInputChange}
         className="input input-bordered w-full"
-      />
-      <input
-        type="text"
-        name="school_year"
-        placeholder="School Year (e.g., 2023-2024)"
-        value={formData.school_year}
-        onChange={handleInputChange}
-        className="input input-bordered w-full"
-        disabled={!!selectedStudent} 
       />
     </div>
 
@@ -402,4 +273,4 @@ const AcademicRecords = () => {
   );
 };
 
-export default AcademicRecords;
+export default TeacherRecords;

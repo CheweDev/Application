@@ -11,6 +11,7 @@ import SF10Template from "./Admin/SF10Template.jsx";
 import Students from "./Teacher/Students.jsx";
 import UserStudentGrade from "./Teacher/UserStudentGrade.jsx";
 import Request from "./Teacher/Request.jsx";
+import TeacherRecords from "./Admin/TeacherRecords.jsx";
 
 const Router = () => {
   return (
@@ -22,6 +23,7 @@ const Router = () => {
         <Route path="/management" element={<RequestManagement />} />
         <Route path="/account" element={<AccountManagement />} />
         <Route path="/academic-records" element={<AcademicRecords />} />
+        <Route path="/teacher-records" element={<TeacherRecords />} />
         <Route path="/student-grade" element={<StudentGrade />} />
         <Route path="/user-dashboard" element={<UserDashboard />} />
         <Route path="/student" element={<Students />} />

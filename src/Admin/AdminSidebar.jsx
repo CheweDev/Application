@@ -125,6 +125,19 @@ const AdminSidebar = () => {
             </li>
             <li>
               <NavLink
+                to="/teacher-records"
+                className={({ isActive }) =>
+                  `flex items-center px-4 py-2.5 ${
+                    isActive ? "bg-green-400 text-white" : "hover:bg-[#2a3441]"
+                  }`
+                }
+              >
+                <FaBook className="mr-3" size={16} />
+                Manage Teachers
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
                 to="/account"
                 className={({ isActive }) =>
                   `flex items-center px-4 py-2.5 ${
