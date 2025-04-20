@@ -329,7 +329,7 @@ const AcademicRecords = () => {
         value={formData.lrn}
         onChange={handleInputChange}
         className="input input-bordered w-full"
-        disabled 
+        disabled={!!selectedStudent}
       />
       <input
         type="date"
