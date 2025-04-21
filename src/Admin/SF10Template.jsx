@@ -737,11 +737,11 @@ const SchoolRecordTable = ({ record, index }) => {
           <tbody>
             {record.remedial.subjects.map((subject, index) => (
               <tr key={index}>
-                <td className="border border-black p-1">{subject.subject}</td>
-                <td className="border border-black p-1 text-center">{subject.finalRating}</td>
-                <td className="border border-black p-1 text-center">{subject.remedialMark}</td>
-                <td className="border border-black p-1 text-center">{subject.recomputedGrade}</td>
-                <td className="border border-black p-1 text-center">{subject.remarks}</td>
+                <td className="border border-black p-2">{subject.subject}</td>
+                <td className="border border-black p-2 text-center">{subject.finalRating}</td>
+                <td className="border border-black p-2 text-center">{subject.remedialMark}</td>
+                <td className="border border-black p-2 text-center">{subject.recomputedGrade}</td>
+                <td className="border border-black p-2 text-center">{subject.remarks}</td>
               </tr>
             ))}
           </tbody>
@@ -826,7 +826,7 @@ const EmptySchoolRecordTable = ({ index, grade = "" }) => {
         </div>
       </div>
 
-      <table className="w-full mt-2 border-collapse">
+      <table className="w-full mt-6 border-collapse">
         <thead>
           <tr>
             <th className="border border-black p-1 w-1/3 text-left">Learning Areas</th>
@@ -901,18 +901,18 @@ const EmptySchoolRecordTable = ({ index, grade = "" }) => {
           </thead>
           <tbody>
             <tr>
-              <td className="border border-black p-1"></td>
-              <td className="border border-black p-1 text-center"></td>
-              <td className="border border-black p-1 text-center"></td>
-              <td className="border border-black p-1 text-center"></td>
-              <td className="border border-black p-1 text-center"></td>
+              <td className="border border-black p-2"></td>
+              <td className="border border-black p-2 text-center"></td>
+              <td className="border border-black p-2 text-center"></td>
+              <td className="border border-black p-2 text-center"></td>
+              <td className="border border-black p-2 text-center"></td>
             </tr>
             <tr>
-              <td className="border border-black p-1"></td>
-              <td className="border border-black p-1 text-center"></td>
-              <td className="border border-black p-1 text-center"></td>
-              <td className="border border-black p-1 text-center"></td>
-              <td className="border border-black p-1 text-center"></td>
+              <td className="border border-black p-2"></td>
+              <td className="border border-black p-2 text-center"></td>
+              <td className="border border-black p-2 text-center"></td>
+              <td className="border border-black p-2 text-center"></td>
+              <td className="border border-black p-2 text-center"></td>
             </tr>
           </tbody>
         </table>
