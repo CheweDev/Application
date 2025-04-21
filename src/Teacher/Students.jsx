@@ -155,11 +155,24 @@ const Students = () => {
     XLSX.writeFile(wb, "student_management.xlsx");
   };
 
-  const filteredStudents = students.filter((s) =>
-    `${s.last_name} ${s.first_name} ${s.middle_name}`
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
+  const filteredStudents = students
+    .filter((s) =>
+      `${s.last_name} ${s.first_name} ${s.middle_name}`
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      // First sort by grade level
+      const gradeLevelA = parseInt(a.gradeLevel.split(' ')[1]);
+      const gradeLevelB = parseInt(b.gradeLevel.split(' ')[1]);
+      
+      if (gradeLevelA !== gradeLevelB) {
+        return gradeLevelA - gradeLevelB;
+      }
+      
+      // Then sort alphabetically by last name within the same grade level
+      return a.last_name.localeCompare(b.last_name);
+    });
 
   return (
     <div className="bg-gray-100 flex min-h-screen">

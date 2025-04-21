@@ -141,24 +141,38 @@ const AcademicRecords = () => {
     XLSX.writeFile(wb, "student_management.xlsx");
   };
 
-  // Strict filtering that only returns exact matches for names
-  const filteredStudents = students.filter((student) => {
-    if (
-      selectedSchoolYear !== "" &&
-      student.school_year !== selectedSchoolYear
-    ) {
-      return false;
-    }
-    if (!searchQuery.trim()) {
-      return true;
-    }
-    const query = searchQuery.toLowerCase().trim();
-    return (
-      student.last_name.toLowerCase() === query ||
-      student.first_name.toLowerCase() === query ||
-      student.lrn === query
-    );
-  });
+  // Strict filtering that only returns exact matches for names and sorts by grade level and last name
+  const filteredStudents = students
+    .filter((student) => {
+      if (
+        selectedSchoolYear !== "" &&
+        student.school_year !== selectedSchoolYear
+      ) {
+        return false;
+      }
+      if (!searchQuery.trim()) {
+        return true;
+      }
+      const query = searchQuery.toLowerCase().trim();
+      return (
+        student.last_name.toLowerCase() === query ||
+        student.first_name.toLowerCase() === query ||
+        student.lrn === query
+      );
+    })
+    .sort((a, b) => {
+      // First sort by grade level
+      const gradeLevelA = parseInt(a.gradeLevel.split(' ')[1]);
+      const gradeLevelB = parseInt(b.gradeLevel.split(' ')[1]);
+      
+      if (gradeLevelA !== gradeLevelB) {
+        return gradeLevelA - gradeLevelB;
+      }
+      
+      // Then sort alphabetically by last name within the same grade level
+      return a.last_name.localeCompare(b.last_name);
+    });
+
   return (
     <div className="bg-gray-100 flex min-h-screen">
       <AdminSidebar />
