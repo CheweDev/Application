@@ -15,11 +15,9 @@ const AdminDashboard = () => {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-
         const { data: studentData, error: studentError } = await supabase
           .from("StudentData")
           .select("*");
@@ -29,7 +27,6 @@ const AdminDashboard = () => {
         } else {
           setStudents(studentData);
         }
-
 
         const { data: requestData, error: requestError } = await supabase
           .from("Request")
@@ -61,12 +58,13 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
-
-  const combinedData = requests.map(request => {
-    const student = students.find(s => s.lrn === request.student_id);
+  const combinedData = requests.map((request) => {
+    const student = students.find((s) => s.lrn === request.student_id);
     return {
       id: request.id,
-      name: student ? `${student.first_name} ${student.last_name}` : "Unknown Student",
+      name: student
+        ? `${student.first_name} ${student.last_name}`
+        : "Unknown Student",
       date: new Date(request.created_at).toLocaleDateString(),
       year: request.school_year || "2023-2024",
       remarks: request.status,
@@ -122,7 +120,9 @@ const AdminDashboard = () => {
               <h3 className="text-gray-600 text-sm uppercase font-semibold tracking-widest">
                 Total Students
               </h3>
-              <p className="text-2xl font-bold text-gray-800">{students.length}</p>
+              <p className="text-2xl font-bold text-gray-800">
+                {students.length}
+              </p>
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-md p-5 flex items-center border-l-4 border-yellow-500">
@@ -133,12 +133,14 @@ const AdminDashboard = () => {
               <h3 className="text-gray-600 text-sm uppercase font-semibold tracking-widest">
                 Total Teachers
               </h3>
-              <p className="text-2xl font-bold text-gray-800">{teachers.length}</p>
+              <p className="text-2xl font-bold text-gray-800">
+                {teachers.length}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap justify-between items-end gap-4">
+        <div className="mt-5 flex flex-wrap justify-end items-end gap-4">
           {/* Remarks Filter */}
           <div>
             <label className="block text-sm text-gray-700 mb-1">
@@ -159,8 +161,6 @@ const AdminDashboard = () => {
           </div>
 
           <div className="flex gap-4 flex-wrap">
-        
-
             {/* School Year Filter */}
             <div>
               <label className="block text-sm text-gray-700 mb-1">
