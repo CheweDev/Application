@@ -141,7 +141,7 @@ const AcademicRecords = () => {
     XLSX.writeFile(wb, "student_management.xlsx");
   };
 
-  // Strict filtering that only returns exact matches for names and sorts by grade level and last name
+ 
   const filteredStudents = students
     .filter((student) => {
       if (
@@ -161,7 +161,6 @@ const AcademicRecords = () => {
       );
     })
     .sort((a, b) => {
-      // First sort by grade level
       const gradeLevelA = parseInt(a.gradeLevel.split(' ')[1]);
       const gradeLevelB = parseInt(b.gradeLevel.split(' ')[1]);
       
@@ -169,7 +168,7 @@ const AcademicRecords = () => {
         return gradeLevelA - gradeLevelB;
       }
       
-      // Then sort alphabetically by last name within the same grade level
+     
       return a.last_name.localeCompare(b.last_name);
     });
 

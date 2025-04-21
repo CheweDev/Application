@@ -35,7 +35,7 @@ const Login = () => {
         const status = data.status?.trim().toLowerCase();
         if (status === 'pending' || status === 'blocked') {
           openStatusModal();
-          return; // stop further execution if status is not allowed
+          return; 
         }
   
         console.log("Login successful:", data);

@@ -162,7 +162,7 @@ const Students = () => {
         .includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
-      // First sort by grade level
+
       const gradeLevelA = parseInt(a.gradeLevel.split(' ')[1]);
       const gradeLevelB = parseInt(b.gradeLevel.split(' ')[1]);
       
@@ -170,7 +170,7 @@ const Students = () => {
         return gradeLevelA - gradeLevelB;
       }
       
-      // Then sort alphabetically by last name within the same grade level
+   
       return a.last_name.localeCompare(b.last_name);
     });
 
