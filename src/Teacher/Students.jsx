@@ -240,6 +240,7 @@ const Students = () => {
                           lrn: student.lrn,
                           gradeLevel: student.gradeLevel,
                           name: `${student.first_name} ${student.last_name}`,
+                          section: student.section,
                         }}
                         className="btn btn-sm btn-outline btn-warning hover:text-white"
                       >

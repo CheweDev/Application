@@ -173,8 +173,8 @@ const SF10Template = () => {
               
               if (validGrades.length > 0) {
                 const sum = validGrades.reduce((acc, grade) => acc + parseFloat(grade), 0);
-                const average = sum / validGrades.length;
-                record.grades[subject].final = average.toFixed(2);
+                const average = Math.round(sum / validGrades.length);
+                record.grades[subject].final = average.toString();
                 record.grades[subject].remarks = average >= 75 ? "Passed" : "Failed";
               } else {
                 record.grades[subject].final = "";

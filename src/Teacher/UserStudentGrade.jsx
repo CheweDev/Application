@@ -20,12 +20,13 @@ const decryptData = (cipherText) => {
 
 const UserStudentGrade = () => {
   const location = useLocation();
-  const { lrn, gradeLevel, name } = location.state || {};
+  const { lrn, gradeLevel, name, section } = location.state || {};
   const modalRef = useRef(null);
   const [grades, setGrades] = useState([]);
   const [formData, setFormData] = useState({
     lrn: lrn || "",
     grade_level: gradeLevel || "",
+    section: section || "",
     quarter: "1st Quarter",
     mother_tongue: "",
     filipino: "",
@@ -54,12 +55,12 @@ const UserStudentGrade = () => {
           .from("Grades")
           .select("*")
           .eq("lrn", lrn)
-          .eq("grade_level", gradeLevel);
+          .eq("grade_level", gradeLevel)
+          .eq("section", section);
 
         if (error) {
           console.error("Error fetching grades:", error);
         } else {
-
           const decryptedGrades = data.map((grade) => {
             const decryptedGrade = { ...grade };
             Object.keys(decryptedGrade).forEach((key) => {
@@ -95,10 +96,10 @@ const UserStudentGrade = () => {
       }
     };
 
-    if (lrn && gradeLevel) {
+    if (lrn && gradeLevel && section) {
       fetchGrades();
     }
-  }, [lrn, gradeLevel]);
+  }, [lrn, gradeLevel, section]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -114,6 +115,7 @@ const UserStudentGrade = () => {
         setFormData({
           lrn: lrn || "",
           grade_level: gradeLevel || "",
+          section: section || "",
           quarter: quarter,
           mother_tongue: "",
           filipino: "",
@@ -138,6 +140,7 @@ const UserStudentGrade = () => {
       setFormData({
         lrn: lrn || "",
         grade_level: gradeLevel || "",
+        section: section || "",
         quarter: "1st Quarter",
         mother_tongue: "",
         filipino: "",
@@ -205,7 +208,8 @@ const UserStudentGrade = () => {
             .from("Grades")
             .select("*")
             .eq("lrn", lrn)
-            .eq("grade_level", gradeLevel);
+            .eq("grade_level", gradeLevel)
+            .eq("section", section);
 
           if (fetchError) {
             console.error("Error fetching updated grades:", fetchError);
@@ -253,7 +257,8 @@ const UserStudentGrade = () => {
             .from("Grades")
             .select("*")
             .eq("lrn", lrn)
-            .eq("grade_level", gradeLevel);
+            .eq("grade_level", gradeLevel)
+            .eq("section", section);
 
           if (fetchError) {
             console.error("Error fetching updated grades:", fetchError);
@@ -305,6 +310,7 @@ const UserStudentGrade = () => {
         .delete()
         .eq("lrn", lrn)
         .eq("grade_level", gradeLevel)
+        .eq("section", section)
         .eq("quarter", formData.quarter);
 
       if (error) {
