@@ -53,7 +53,8 @@ const UserStudentGrade = () => {
         const { data, error } = await supabase
           .from("Grades")
           .select("*")
-          .eq("lrn", lrn);
+          .eq("lrn", lrn)
+          .eq("grade_level", gradeLevel);
 
         if (error) {
           console.error("Error fetching grades:", error);
@@ -429,21 +430,13 @@ const UserStudentGrade = () => {
             </div>
 
             <div className="flex justify-end gap-3 mt-5">
-              {selectedCard && (
-                <button
-                  className="btn btn-error text-white"
-                  onClick={handleDelete}
-                >
-                  Delete
-                </button>
-              )}
-              <button
-                className="btn btn-primary text-white"
-                onClick={handleSubmit}
-              >
-                {selectedCard ? "Update" : "Save"}
-              </button>
-            </div>
+          <button
+            className="btn btn-primary text-white"
+            onClick={handleSubmit}
+          >
+            {selectedCard ? "Update" : "Save"}
+          </button>
+        </div>
           </div>
         </dialog>
       </main>
