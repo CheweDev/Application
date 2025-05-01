@@ -12,7 +12,7 @@ const RequestManagement = () => {
   const [loading, setLoading] = useState(true);
   const modalRef = useRef(null);
   const acceptedModalRef = useRef(null);
-
+  const [rejectionComment, setRejectionComment] = useState("");
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -49,15 +49,24 @@ const RequestManagement = () => {
 
   const handleDecision = async (decision) => {
     try {
-      const { error } = await supabase
+      const updateData = { status: decision };
+      if (decision === "Rejected") {
+        updateData.comment = rejectionComment;
+      }
+
+      console.log("Selected item:", selectedItem);
+
+      const { data, error } = await supabase
         .from("Request")
-        .update({ status: decision })
-        .eq("id", selectedItem.id);
+        .update(updateData)
+        .eq("id", selectedItem.id)
+        .select();
+
+      console.log("Updated row:", data);
 
       if (error) {
         console.error("Error updating request:", error);
       } else {
- 
         const { data: updatedRequests, error: fetchError } = await supabase
           .from("Request")
           .select("*")
@@ -75,7 +84,37 @@ const RequestManagement = () => {
 
     modalRef.current.close();
     setSelectedItem(null);
+    setRejectionComment("");
   };
+  // const handleDecision = async (decision) => {
+  //   try {
+  //     const { error } = await supabase
+  //       .from("Request")
+  //       .update({ status: decision })
+  //       .eq("id", selectedItem.id);
+
+  //     if (error) {
+  //       console.error("Error updating request:", error);
+  //     } else {
+
+  //       const { data: updatedRequests, error: fetchError } = await supabase
+  //         .from("Request")
+  //         .select("*")
+  //         .order("created_at", { ascending: false });
+
+  //       if (fetchError) {
+  //         console.error("Error fetching updated requests:", fetchError);
+  //       } else {
+  //         setRequests(updatedRequests);
+  //       }
+  //     }
+  //   } catch (err) {
+  //     console.error("Unexpected error:", err);
+  //   }
+
+  //   modalRef.current.close();
+  //   setSelectedItem(null);
+  // };
 
   const handleAcceptedDecision = async (newStatus) => {
     try {
@@ -87,7 +126,6 @@ const RequestManagement = () => {
       if (error) {
         console.error("Error updating request:", error);
       } else {
-
         const { data: updatedRequests, error: fetchError } = await supabase
           .from("Request")
           .select("*")
@@ -108,13 +146,13 @@ const RequestManagement = () => {
   };
 
   const handleSaveAsExcel = () => {
-    const filteredTableData = filteredData.map(item => ({
+    const filteredTableData = filteredData.map((item) => ({
       Name: item.student_name,
       Grade: item.grade_level,
       Section: item.section,
       Status: item.status,
       "Date Requested": new Date(item.created_at).toLocaleDateString(),
-      "School Year": item.school_year
+      "School Year": item.school_year,
     }));
 
     const ws = XLSX.utils.json_to_sheet(filteredTableData);
@@ -122,7 +160,6 @@ const RequestManagement = () => {
     XLSX.utils.book_append_sheet(wb, ws, "Requests");
     XLSX.writeFile(wb, "request_management.xlsx");
   };
-
 
   const filteredData = requests
     .filter((item) => item.status.toLowerCase() === activeTab)
@@ -268,16 +305,27 @@ const RequestManagement = () => {
             <h3 className="font-bold text-lg mb-2">
               Manage Request for {selectedItem?.student_name}
             </h3>
-            <p className="mb-10 mt-5">
+            <p className="mt-5 mb-2">
               Do you want to accept or reject this request?
             </p>
+            <textarea
+              className="textarea textarea-bordered w-full mb-4"
+              placeholder="Enter reason for rejection"
+              value={rejectionComment}
+              onChange={(e) => setRejectionComment(e.target.value)}
+              required
+              disabled={selectedItem?.status !== "Pending"} // Optional: disable for non-pending
+            />
+
             <div className="flex justify-end gap-2">
               <button
                 className="btn btn-error text-white"
                 onClick={() => handleDecision("Rejected")}
+                disabled={!rejectionComment.trim()}
               >
                 Reject
               </button>
+
               <button
                 className="btn btn-success text-white"
                 onClick={() => handleDecision("Accepted")}

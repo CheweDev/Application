@@ -7,14 +7,15 @@ const Request = () => {
   const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [commentModalOpen, setCommentModalOpen] = useState(false);
+  const [selectedComment, setSelectedComment] = useState("");
   const modalRef = useRef(null);
-
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const gradeLevel = sessionStorage.getItem('grade_level');
-        const section = sessionStorage.getItem('section');
+        const gradeLevel = sessionStorage.getItem("grade_level");
+        const section = sessionStorage.getItem("section");
 
         const { data: studentData, error: studentError } = await supabase
           .from("StudentData")
@@ -27,7 +28,6 @@ const Request = () => {
         } else {
           setStudents(studentData);
         }
-
 
         const { data: requestData, error: requestError } = await supabase
           .from("Request")
@@ -53,32 +53,33 @@ const Request = () => {
     modalRef.current?.showModal();
   };
 
+  const handleShowComment = (comment) => {
+    setSelectedComment(comment || "No reason provided.");
+    setCommentModalOpen(true);
+  };
+
   const handleAddRequest = async () => {
     try {
-      const gradeLevel = sessionStorage.getItem('grade_level');
-      const section = sessionStorage.getItem('section');
+      const gradeLevel = sessionStorage.getItem("grade_level");
+      const section = sessionStorage.getItem("section");
       const currentYear = new Date().getFullYear();
       const schoolYear = `${currentYear}-${currentYear + 1}`;
 
-
-      const newRequests = selectedStudents.map(student => ({
+      const newRequests = selectedStudents.map((student) => ({
         student_id: student.lrn,
         student_name: `${student.first_name} ${student.last_name}`,
         grade_level: gradeLevel,
         section: section,
         status: "Pending",
         school_year: schoolYear,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       }));
 
-      const { error } = await supabase
-        .from("Request")
-        .insert(newRequests);
+      const { error } = await supabase.from("Request").insert(newRequests);
 
       if (error) {
         console.error("Error adding requests:", error);
       } else {
-  
         const { data: updatedRequests, error: fetchError } = await supabase
           .from("Request")
           .select("*")
@@ -99,16 +100,16 @@ const Request = () => {
   };
 
   const handleStudentSelect = (student) => {
-    setSelectedStudents(prev => {
-      if (prev.some(s => s.lrn === student.lrn)) {
-        return prev.filter(s => s.lrn !== student.lrn);
+    setSelectedStudents((prev) => {
+      if (prev.some((s) => s.lrn === student.lrn)) {
+        return prev.filter((s) => s.lrn !== student.lrn);
       } else {
         return [...prev, student];
       }
     });
   };
 
-  const filteredRequests = requests.filter(request =>
+  const filteredRequests = requests.filter((request) =>
     request.student_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -133,10 +134,7 @@ const Request = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="input input-bordered w-full max-w-xs"
             />
-            <button
-              className="btn btn-primary"
-              onClick={handleOpenModal}
-            >
+            <button className="btn btn-primary" onClick={handleOpenModal}>
               + Add Request
             </button>
           </div>
@@ -170,15 +168,31 @@ const Request = () => {
                     <td>{request.grade_level}</td>
                     <td>{request.section}</td>
                     <td>
-                      <span className={`px-3 py-1 rounded-md text-xs font-medium ${
-                        request.status === "Pending" 
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-green-100 text-green-800"
-                      }`}>
+                      <span
+                        className={`px-3 py-1 rounded-md text-xs font-medium ${
+                          request.status === "Pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : request.status === "Rejected"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-green-100 text-green-800"
+                        }`}
+                      >
                         {request.status}
                       </span>
                     </td>
                     <td>{new Date(request.created_at).toLocaleDateString()}</td>
+                    {request.status === "Rejected" ? (
+                      <td>
+                        <button
+                          className="btn btn-xs btn-outline btn-error hover:text-white"
+                          onClick={() => handleShowComment(request.comment)}
+                        >
+                          View Reason
+                        </button>
+                      </td>
+                    ) : (
+                      <td></td>
+                    )}
                   </tr>
                 ))
               )}
@@ -210,7 +224,9 @@ const Request = () => {
                       <td>
                         <input
                           type="checkbox"
-                          checked={selectedStudents.some(s => s.lrn === student.lrn)}
+                          checked={selectedStudents.some(
+                            (s) => s.lrn === student.lrn
+                          )}
                           onChange={() => handleStudentSelect(student)}
                           className="checkbox"
                         />
@@ -236,6 +252,27 @@ const Request = () => {
             </div>
           </div>
         </dialog>
+
+        {commentModalOpen && (
+          <dialog open className="modal">
+            <div className="modal-box">
+              <h3 className="font-bold text-lg text-red-600">
+                Rejection Reason
+              </h3>
+              <p className="py-4 text-gray-700 whitespace-pre-wrap">
+                {selectedComment}
+              </p>
+              <div className="modal-action">
+                <button
+                  className="btn"
+                  onClick={() => setCommentModalOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </dialog>
+        )}
       </main>
     </div>
   );

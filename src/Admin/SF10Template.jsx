@@ -3,7 +3,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
 import { useLocation, useNavigate } from "react-router-dom";
 import supabase from "../Supabase";
-import CryptoJS from 'crypto-js';
+import CryptoJS from "crypto-js";
 
 const ENCRYPTION_KEY = "your-secure-key";
 
@@ -25,22 +25,22 @@ const SF10Template = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const { lrn, gradeLevel, name, birthdate, sex } = location.state || {};
 
         if (!lrn || !name) {
-          throw new Error('Missing required student data');
+          throw new Error("Missing required student data");
         }
 
         const { data: grades, error: fetchError } = await supabase
-          .from('Grades')
-          .select('*')
-          .eq('lrn', lrn);
+          .from("Grades")
+          .select("*")
+          .eq("lrn", lrn);
 
         if (fetchError) throw fetchError;
 
         if (!grades || grades.length === 0) {
-          throw new Error('No grades found for this student');
+          throw new Error("No grades found for this student");
         }
 
         const gradesByLevel = grades.reduce((acc, grade) => {
@@ -52,8 +52,8 @@ const SF10Template = () => {
         }, {});
 
         const transformedData = {
-          lastName: name.split(' ')[1] || "",
-          firstName: name.split(' ')[0] || "",
+          lastName: name.split(" ")[1] || "",
+          firstName: name.split(" ")[0] || "",
           nameExtn: "",
           middleName: "",
           lrn: lrn,
@@ -74,123 +74,265 @@ const SF10Template = () => {
           nameAndAddressOfTestingCenter: "",
           remark: "",
 
-          scholasticRecords: Object.entries(gradesByLevel || {}).map(([gradeLevel, gradeRecords]) => {
-            if (!gradeRecords || !Array.isArray(gradeRecords) || gradeRecords.length === 0) {
-              return null;
-            }
+          scholasticRecords: Object.entries(gradesByLevel || {})
+            .map(([gradeLevel, gradeRecords]) => {
+              if (
+                !gradeRecords ||
+                !Array.isArray(gradeRecords) ||
+                gradeRecords.length === 0
+              ) {
+                return null;
+              }
 
-            const firstRecord = gradeRecords[0];
-            
-            const quarterMap = {
-              '1st Quarter': 'q1',
-              '2nd Quarter': 'q2',
-              '3rd Quarter': 'q3',
-              '4th Quarter': 'q4'
-            };
+              const firstRecord = gradeRecords[0];
 
-            const record = {
-              school: " Magallanes Agusan Del Norte",
-              district: "Magallanes",
-              division: "Agusan Del Norte",
-              grade: gradeLevel,
-              section: firstRecord?.section || "",
-              adviser: firstRecord?.adviser || "",
-              schoolId: "131485",
-              schoolYear: firstRecord?.school_year || "",
-              region: "Caraga",
-              signature: firstRecord?.adviser_signature || "",
+              const quarterMap = {
+                "1st Quarter": "q1",
+                "2nd Quarter": "q2",
+                "3rd Quarter": "q3",
+                "4th Quarter": "q4",
+              };
 
-              grades: {
-                "Mother Tongue": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "Filipino": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "English": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "Mathematics": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "Science": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "Araling Panlipunan": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "EPP / TLE": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "MAPEH": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "Music": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "Arts": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "Physical Education": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "Health": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "Eduk. sa Pagpapakatao": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "*Arabic Language": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "*Islamic Values Education": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-                "General Average": { q1: "", q2: "", q3: "", q4: "", final: "", remarks: "" },
-              },
+              const record = {
+                school: " Magallanes Elementary School",
+                district: "Magallanes",
+                division: "Agusan Del Norte",
+                grade: gradeLevel,
+                section: firstRecord?.section || "",
+                adviser: firstRecord?.adviser || "",
+                schoolId: "131485",
+                schoolYear: firstRecord?.school_year || "",
+                region: "Caraga",
+                signature: firstRecord?.adviser_signature || "",
 
-              remedial: {
-                conductedFrom: "",
-                conductedTo: "",
-                subjects: [
-                  { subject: "", finalRating: "", remedialMark: "", recomputedGrade: "", remarks: "" },
-                  { subject: "", finalRating: "", remedialMark: "", recomputedGrade: "", remarks: "" },
-                ],
-              },
-            };
+                grades: {
+                  "Mother Tongue": {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  Filipino: {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  English: {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  Mathematics: {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  Science: {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  "Araling Panlipunan": {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  "EPP / TLE": {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  MAPEH: {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  Music: {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  Arts: {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  "Physical Education": {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  Health: {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  "Eduk. sa Pagpapakatao": {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  "*Arabic Language": {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  "*Islamic Values Education": {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                  "General Average": {
+                    q1: "",
+                    q2: "",
+                    q3: "",
+                    q4: "",
+                    final: "",
+                    remarks: "",
+                  },
+                },
 
-            const subjectMap = {
-              "Mother Tongue": "mother_tongue",
-              "Filipino": "filipino",
-              "English": "english",
-              "Mathematics": "math",
-              "Science": "science",
-              "Araling Panlipunan": "ap",
-              "EPP / TLE": "epp_tle",
-              "MAPEH": "mapeh",
-              "Music": "music",
-              "Arts": "arts",
-              "Physical Education": "pe",
-              "Health": "health",
-              "Eduk. sa Pagpapakatao": "ep",
-              "*Arabic Language": "arabic",
-              "*Islamic Values Education": "islamic",
-              "General Average": "average"
-            };
+                remedial: {
+                  conductedFrom: "",
+                  conductedTo: "",
+                  subjects: [
+                    {
+                      subject: "",
+                      finalRating: "",
+                      remedialMark: "",
+                      recomputedGrade: "",
+                      remarks: "",
+                    },
+                    {
+                      subject: "",
+                      finalRating: "",
+                      remedialMark: "",
+                      recomputedGrade: "",
+                      remarks: "",
+                    },
+                  ],
+                },
+              };
 
-            gradeRecords.forEach(gradeRecord => {
-              if (!gradeRecord || !gradeRecord.quarter) return;
-              
-              const quarter = quarterMap[gradeRecord.quarter];
-              if (!quarter) return;
+              const subjectMap = {
+                "Mother Tongue": "mother_tongue",
+                Filipino: "filipino",
+                English: "english",
+                Mathematics: "math",
+                Science: "science",
+                "Araling Panlipunan": "ap",
+                "EPP / TLE": "epp_tle",
+                MAPEH: "mapeh",
+                Music: "music",
+                Arts: "arts",
+                "Physical Education": "pe",
+                Health: "health",
+                "Eduk. sa Pagpapakatao": "ep",
+                "*Arabic Language": "arabic",
+                "*Islamic Values Education": "islamic",
+                "General Average": "average",
+              };
 
-              Object.entries(subjectMap).forEach(([subjectName, dbColumn]) => {
-                if (gradeRecord[dbColumn]) {
-                  try {
-                    record.grades[subjectName][quarter] = decryptData(gradeRecord[dbColumn]);
-                  } catch (error) {
-                    console.warn(`Error decrypting ${subjectName} for quarter ${quarter}:`, error);
-                    record.grades[subjectName][quarter] = "";
+              gradeRecords.forEach((gradeRecord) => {
+                if (!gradeRecord || !gradeRecord.quarter) return;
+
+                const quarter = quarterMap[gradeRecord.quarter];
+                if (!quarter) return;
+
+                Object.entries(subjectMap).forEach(
+                  ([subjectName, dbColumn]) => {
+                    if (gradeRecord[dbColumn]) {
+                      try {
+                        record.grades[subjectName][quarter] = decryptData(
+                          gradeRecord[dbColumn]
+                        );
+                      } catch (error) {
+                        console.warn(
+                          `Error decrypting ${subjectName} for quarter ${quarter}:`,
+                          error
+                        );
+                        record.grades[subjectName][quarter] = "";
+                      }
+                    }
                   }
+                );
+              });
+
+              Object.entries(record.grades).forEach(([subject, grades]) => {
+                const quarters = [grades.q1, grades.q2, grades.q3, grades.q4];
+                const validGrades = quarters.filter(
+                  (grade) => grade !== "" && !isNaN(grade)
+                );
+
+                if (validGrades.length > 0) {
+                  const sum = validGrades.reduce(
+                    (acc, grade) => acc + parseFloat(grade),
+                    0
+                  );
+                  const average = Math.round(sum / validGrades.length);
+                  record.grades[subject].final = average.toString();
+                  record.grades[subject].remarks =
+                    average >= 75 ? "Passed" : "Failed";
+                } else {
+                  record.grades[subject].final = "";
+                  record.grades[subject].remarks = "";
                 }
               });
-            });
 
-
-            Object.entries(record.grades).forEach(([subject, grades]) => {
-              const quarters = [grades.q1, grades.q2, grades.q3, grades.q4];
-              const validGrades = quarters.filter(grade => grade !== "" && !isNaN(grade));
-              
-              if (validGrades.length > 0) {
-                const sum = validGrades.reduce((acc, grade) => acc + parseFloat(grade), 0);
-                const average = Math.round(sum / validGrades.length);
-                record.grades[subject].final = average.toString();
-                record.grades[subject].remarks = average >= 75 ? "Passed" : "Failed";
-              } else {
-                record.grades[subject].final = "";
-                record.grades[subject].remarks = "";
-              }
-            });
-
-            return record;
-          }).filter(record => record !== null),
+              return record;
+            })
+            .filter((record) => record !== null),
         };
 
         setStudentData(transformedData);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching student data:', error);
-        setError(error.message || 'Failed to fetch student data');
+        console.error("Error fetching student data:", error);
+        setError(error.message || "Failed to fetch student data");
         setLoading(false);
       }
     };
@@ -228,14 +370,15 @@ const SF10Template = () => {
 
         const content = formRef.current;
 
-        const allRecords = content.querySelectorAll('.school-record-table');
-        const certificationBoxes = content.querySelectorAll('.certification-box');
-        
+        const allRecords = content.querySelectorAll(".school-record-table");
+        const certificationBoxes =
+          content.querySelectorAll(".certification-box");
+
         for (let i = 4; i < allRecords.length; i++) {
-          allRecords[i].style.display = 'none';
+          allRecords[i].style.display = "none";
         }
-        certificationBoxes.forEach(box => {
-          box.style.display = 'none';
+        certificationBoxes.forEach((box) => {
+          box.style.display = "none";
         });
 
         const canvas1 = await html2canvas(content, {
@@ -246,13 +389,13 @@ const SF10Template = () => {
         });
 
         for (let i = 4; i < allRecords.length; i++) {
-          allRecords[i].style.display = '';
+          allRecords[i].style.display = "";
         }
-        certificationBoxes.forEach(box => {
-          box.style.display = '';
+        certificationBoxes.forEach((box) => {
+          box.style.display = "";
         });
         for (let i = 0; i < 4; i++) {
-          allRecords[i].style.display = 'none';
+          allRecords[i].style.display = "none";
         }
 
         const canvas2 = await html2canvas(content, {
@@ -263,11 +406,13 @@ const SF10Template = () => {
         });
 
         for (let i = 0; i < 4; i++) {
-          allRecords[i].style.display = '';
+          allRecords[i].style.display = "";
         }
 
-        const contentWidth = pdf.internal.pageSize.getWidth() - margin.left - margin.right;
-        const pageHeight = pdf.internal.pageSize.getHeight() - margin.top - margin.bottom;
+        const contentWidth =
+          pdf.internal.pageSize.getWidth() - margin.left - margin.right;
+        const pageHeight =
+          pdf.internal.pageSize.getHeight() - margin.top - margin.bottom;
 
         const imgData1 = canvas1.toDataURL("image/png");
         pdf.addImage(
@@ -303,7 +448,9 @@ const SF10Template = () => {
           pdf.internal.pageSize.getHeight() - 10
         );
 
-        pdf.save(`SF10-ES_${studentData.lastName}_${studentData.firstName}.pdf`);
+        pdf.save(
+          `SF10-ES_${studentData.lastName}_${studentData.firstName}.pdf`
+        );
         restoreButton();
       }
     } catch (error) {
@@ -341,7 +488,7 @@ const SF10Template = () => {
           Save as PDF
         </button>
         <button
-          onClick={() => navigate('/academic-records')}
+          onClick={() => navigate("/academic-records")}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
         >
           Back
@@ -410,7 +557,9 @@ const SF10Template = () => {
             <div className="col-span-2">
               <div className="flex">
                 <span className="font-bold mr-1">MIDDLE NAME:</span>
-                <span className="flex-1 border-b">{studentData.middleName}</span>
+                <span className="flex-1 border-b">
+                  {studentData.middleName}
+                </span>
               </div>
             </div>
           </div>
@@ -418,8 +567,12 @@ const SF10Template = () => {
           <div className="grid grid-cols-12 gap-1 mt-2">
             <div className="col-span-6">
               <div className="flex">
-                <span className="font-bold mr-1">Learner Reference Number (LRN):</span>
-                <span className="flex-1 border-b border-black">{studentData.lrn}</span>
+                <span className="font-bold mr-1">
+                  Learner Reference Number (LRN):
+                </span>
+                <span className="flex-1 border-b border-black">
+                  {studentData.lrn}
+                </span>
               </div>
             </div>
             <div className="col-span-4">
@@ -433,7 +586,9 @@ const SF10Template = () => {
             <div className="col-span-2">
               <div className="flex">
                 <span className="font-bold mr-1">Sex:</span>
-                <span className="flex-1 border-b border-black">{studentData.sex}</span>
+                <span className="flex-1 border-b border-black">
+                  {studentData.sex}
+                </span>
               </div>
             </div>
           </div>
@@ -446,11 +601,15 @@ const SF10Template = () => {
           <div className="grid grid-cols-12 gap-1 mt-2">
             <div className="col-span-12">
               <div className="flex space-x-4">
-                <span className="font-bold mr-1">Credential Presented for Grade 1:</span>
+                <span className="font-bold mr-1">
+                  Credential Presented for Grade 1:
+                </span>
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={studentData.credentialPresented.kinderProgressReport}
+                    checked={
+                      studentData.credentialPresented.kinderProgressReport
+                    }
                     readOnly
                     className="mr-1"
                   />
@@ -468,7 +627,9 @@ const SF10Template = () => {
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={studentData.credentialPresented.kindergartenCertificate}
+                    checked={
+                      studentData.credentialPresented.kindergartenCertificate
+                    }
                     readOnly
                     className="mr-1"
                   />
@@ -482,19 +643,25 @@ const SF10Template = () => {
             <div className="col-span-4">
               <div className="flex">
                 <span className="font-bold mr-1">Name of School:</span>
-                <span className="flex-1 border-b border-black">{studentData.nameOfSchool}</span>
+                <span className="flex-1 border-b border-black">
+                  {studentData.nameOfSchool}
+                </span>
               </div>
             </div>
             <div className="col-span-2">
               <div className="flex">
                 <span className="font-bold mr-1">School ID:</span>
-                <span className="flex-1 border-b border-black">{studentData.schoolId}</span>
+                <span className="flex-1 border-b border-black">
+                  {studentData.schoolId}
+                </span>
               </div>
             </div>
             <div className="col-span-6">
               <div className="flex">
                 <span className="font-bold mr-1">Address of School:</span>
-                <span className="flex-1 border-b border-black">{studentData.addressOfSchool}</span>
+                <span className="flex-1 border-b border-black">
+                  {studentData.addressOfSchool}
+                </span>
               </div>
             </div>
           </div>
@@ -519,10 +686,14 @@ const SF10Template = () => {
                   </span>
                 </div>
                 <div className="flex">
-                  <span className="mr-1">Date of Examination/Assessment (mm/dd/yyyy):</span>
+                  <span className="mr-1">
+                    Date of Examination/Assessment (mm/dd/yyyy):
+                  </span>
                   <span className="w-32 border-b border-black">
                     {studentData.credentialPresented.examDate
-                      ? new Date(studentData.credentialPresented.examDate).toLocaleDateString()
+                      ? new Date(
+                          studentData.credentialPresented.examDate
+                        ).toLocaleDateString()
                       : ""}
                   </span>
                 </div>
@@ -539,7 +710,9 @@ const SF10Template = () => {
           <div className="grid grid-cols-12 gap-1 mt-2">
             <div className="col-span-8">
               <div className="flex">
-                <span className="font-bold mr-1">Name and Address of Testing Center:</span>
+                <span className="font-bold mr-1">
+                  Name and Address of Testing Center:
+                </span>
                 <span className="flex-1 border-b border-black">
                   {studentData.nameAndAddressOfTestingCenter}
                 </span>
@@ -548,7 +721,9 @@ const SF10Template = () => {
             <div className="col-span-4">
               <div className="flex">
                 <span className="font-bold mr-1">Remark:</span>
-                <span className="flex-1 border-b border-black">{studentData.remark}</span>
+                <span className="flex-1 border-b border-black">
+                  {studentData.remark}
+                </span>
               </div>
             </div>
           </div>
@@ -561,18 +736,18 @@ const SF10Template = () => {
           <div className="grid grid-cols-2 gap-2 mt-2">
             {[1, 2, 3, 4, 5, 6].map((gradeNum) => {
               const gradeRecord = studentData.scholasticRecords.find(
-                record => record.grade === `Grade ${gradeNum}`
+                (record) => record.grade === `Grade ${gradeNum}`
               );
               return gradeRecord ? (
-                <SchoolRecordTable 
-                  key={`grade-${gradeNum}`} 
-                  record={gradeRecord} 
-                  index={gradeNum - 1} 
+                <SchoolRecordTable
+                  key={`grade-${gradeNum}`}
+                  record={gradeRecord}
+                  index={gradeNum - 1}
                 />
               ) : (
-                <EmptySchoolRecordTable 
-                  key={`empty-grade-${gradeNum}`} 
-                  index={gradeNum - 1} 
+                <EmptySchoolRecordTable
+                  key={`empty-grade-${gradeNum}`}
+                  index={gradeNum - 1}
                   grade={`Grade ${gradeNum}`}
                 />
               );
@@ -597,18 +772,25 @@ const SF10Template = () => {
 
 const SchoolRecordTable = ({ record, index }) => {
   return (
-    <div className={`school-record-table border border-black p-1`} id={`school-record-${index}`}>
+    <div
+      className={`school-record-table border border-black p-1`}
+      id={`school-record-${index}`}
+    >
       <div className="grid grid-cols-12 gap-4 mb-2">
         <div className="col-span-8">
           <div className="flex items-center">
             <span className="font-bold mr-1">School:</span>
-            <span className="border-b border-black flex-1">{record.school}</span>
+            <span className="border-b border-black flex-1">
+              {record.school}
+            </span>
           </div>
         </div>
         <div className="col-span-4">
           <div className="flex items-center">
             <span className="font-bold mr-1">School ID:</span>
-            <span className="border-b border-black flex-1">{record.schoolId}</span>
+            <span className="border-b border-black flex-1">
+              {record.schoolId}
+            </span>
           </div>
         </div>
       </div>
@@ -617,19 +799,25 @@ const SchoolRecordTable = ({ record, index }) => {
         <div className="col-span-4">
           <div className="flex items-center">
             <span className="font-bold mr-1">District:</span>
-            <span className="border-b border-black flex-1">{record.district}</span>
+            <span className="border-b border-black flex-1">
+              {record.district}
+            </span>
           </div>
         </div>
         <div className="col-span-4">
           <div className="flex items-center">
             <span className="font-bold mr-1">Division:</span>
-            <span className="border-b border-black flex-1">{record.division}</span>
+            <span className="border-b border-black flex-1">
+              {record.division}
+            </span>
           </div>
         </div>
         <div className="col-span-4">
           <div className="flex items-center">
             <span className="font-bold mr-1">Region:</span>
-            <span className="border-b border-black flex-1">{record.region}</span>
+            <span className="border-b border-black flex-1">
+              {record.region}
+            </span>
           </div>
         </div>
       </div>
@@ -644,13 +832,17 @@ const SchoolRecordTable = ({ record, index }) => {
         <div className="col-span-4">
           <div className="flex items-center">
             <span className="font-bold mr-1">Section:</span>
-            <span className="border-b border-black flex-1">{record.section}</span>
+            <span className="border-b border-black flex-1">
+              {record.section}
+            </span>
           </div>
         </div>
         <div className="col-span-4">
           <div className="flex items-center">
             <span className="font-bold mr-1">School Year:</span>
-            <span className="border-b border-black flex-1">{record.schoolYear}</span>
+            <span className="border-b border-black flex-1">
+              {record.schoolYear}
+            </span>
           </div>
         </div>
       </div>
@@ -659,13 +851,17 @@ const SchoolRecordTable = ({ record, index }) => {
         <div className="col-span-8">
           <div className="flex items-center">
             <span className="font-bold mr-1">Name of Adviser/Teacher:</span>
-            <span className="border-b border-black flex-1">{record.adviser}</span>
+            <span className="border-b border-black flex-1">
+              {record.adviser}
+            </span>
           </div>
         </div>
         <div className="col-span-4">
           <div className="flex items-center">
             <span className="font-bold mr-1">Signature:</span>
-            <span className="border-b border-black flex-1">{record.signature}</span>
+            <span className="border-b border-black flex-1">
+              {record.signature}
+            </span>
           </div>
         </div>
       </div>
@@ -673,12 +869,21 @@ const SchoolRecordTable = ({ record, index }) => {
       <table className="w-full mt-2 border-collapse">
         <thead>
           <tr>
-            <th className="border border-black p-1 w-1/3 text-left">Learning Areas</th>
-            <th className="border border-black p-1 w-1/3 text-center" colSpan={4}>
+            <th className="border border-black p-1 w-1/3 text-left">
+              Learning Areas
+            </th>
+            <th
+              className="border border-black p-1 w-1/3 text-center"
+              colSpan={4}
+            >
               Quarterly Rating
             </th>
-            <th className="border border-black p-1 w-1/6 text-center">Final Rating</th>
-            <th className="border border-black p-1 w-1/6 text-center">Remarks</th>
+            <th className="border border-black p-1 w-1/6 text-center">
+              Final Rating
+            </th>
+            <th className="border border-black p-1 w-1/6 text-center">
+              Remarks
+            </th>
           </tr>
           <tr>
             <th className="border-l border-r border-black"></th>
@@ -694,12 +899,24 @@ const SchoolRecordTable = ({ record, index }) => {
           {Object.entries(record.grades).map(([subject, grades]) => (
             <tr key={subject}>
               <td className="border border-black p-1">{subject}</td>
-              <td className="border border-black p-1 text-center">{grades.q1}</td>
-              <td className="border border-black p-1 text-center">{grades.q2}</td>
-              <td className="border border-black p-1 text-center">{grades.q3}</td>
-              <td className="border border-black p-1 text-center">{grades.q4}</td>
-              <td className="border border-black p-1 text-center">{grades.final}</td>
-              <td className="border border-black p-1 text-center">{grades.remarks}</td>
+              <td className="border border-black p-1 text-center">
+                {grades.q1}
+              </td>
+              <td className="border border-black p-1 text-center">
+                {grades.q2}
+              </td>
+              <td className="border border-black p-1 text-center">
+                {grades.q3}
+              </td>
+              <td className="border border-black p-1 text-center">
+                {grades.q4}
+              </td>
+              <td className="border border-black p-1 text-center">
+                {grades.final}
+              </td>
+              <td className="border border-black p-1 text-center">
+                {grades.remarks}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -727,10 +944,18 @@ const SchoolRecordTable = ({ record, index }) => {
         <table className="w-full mt-1 border-collapse">
           <thead>
             <tr>
-              <th className="border border-black p-1 text-left">Learning Areas</th>
-              <th className="border border-black p-1 text-center">Final Rating</th>
-              <th className="border border-black p-1 text-center">Remedial Class Mark</th>
-              <th className="border border-black p-1 text-center">Recomputed Final Grade</th>
+              <th className="border border-black p-1 text-left">
+                Learning Areas
+              </th>
+              <th className="border border-black p-1 text-center">
+                Final Rating
+              </th>
+              <th className="border border-black p-1 text-center">
+                Remedial Class Mark
+              </th>
+              <th className="border border-black p-1 text-center">
+                Recomputed Final Grade
+              </th>
               <th className="border border-black p-1 text-center">Remarks</th>
             </tr>
           </thead>
@@ -738,10 +963,18 @@ const SchoolRecordTable = ({ record, index }) => {
             {record.remedial.subjects.map((subject, index) => (
               <tr key={index}>
                 <td className="border border-black p-2">{subject.subject}</td>
-                <td className="border border-black p-2 text-center">{subject.finalRating}</td>
-                <td className="border border-black p-2 text-center">{subject.remedialMark}</td>
-                <td className="border border-black p-2 text-center">{subject.recomputedGrade}</td>
-                <td className="border border-black p-2 text-center">{subject.remarks}</td>
+                <td className="border border-black p-2 text-center">
+                  {subject.finalRating}
+                </td>
+                <td className="border border-black p-2 text-center">
+                  {subject.remedialMark}
+                </td>
+                <td className="border border-black p-2 text-center">
+                  {subject.recomputedGrade}
+                </td>
+                <td className="border border-black p-2 text-center">
+                  {subject.remarks}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -753,7 +986,10 @@ const SchoolRecordTable = ({ record, index }) => {
 
 const EmptySchoolRecordTable = ({ index, grade = "" }) => {
   return (
-    <div className={`school-record-table border border-black p-1`} id={`empty-school-record-${index}`}>
+    <div
+      className={`school-record-table border border-black p-1`}
+      id={`empty-school-record-${index}`}
+    >
       <div className="grid grid-cols-12 gap-4 mb-2">
         <div className="col-span-8">
           <div className="flex items-center">
@@ -829,12 +1065,21 @@ const EmptySchoolRecordTable = ({ index, grade = "" }) => {
       <table className="w-full mt-6 border-collapse">
         <thead>
           <tr>
-            <th className="border border-black p-1 w-1/3 text-left">Learning Areas</th>
-            <th className="border border-black p-1 w-1/3 text-center" colSpan={4}>
+            <th className="border border-black p-1 w-1/3 text-left">
+              Learning Areas
+            </th>
+            <th
+              className="border border-black p-1 w-1/3 text-center"
+              colSpan={4}
+            >
               Quarterly Rating
             </th>
-            <th className="border border-black p-1 w-1/6 text-center">Final Rating</th>
-            <th className="border border-black p-1 w-1/6 text-center">Remarks</th>
+            <th className="border border-black p-1 w-1/6 text-center">
+              Final Rating
+            </th>
+            <th className="border border-black p-1 w-1/6 text-center">
+              Remarks
+            </th>
           </tr>
           <tr>
             <th className="border-l border-r border-black"></th>
@@ -892,10 +1137,18 @@ const EmptySchoolRecordTable = ({ index, grade = "" }) => {
         <table className="w-full mt-1 border-collapse">
           <thead>
             <tr>
-              <th className="border border-black p-1 text-left">Learning Areas</th>
-              <th className="border border-black p-1 text-center">Final Rating</th>
-              <th className="border border-black p-1 text-center">Remedial Class Mark</th>
-              <th className="border border-black p-1 text-center">Recomputed Final Grade</th>
+              <th className="border border-black p-1 text-left">
+                Learning Areas
+              </th>
+              <th className="border border-black p-1 text-center">
+                Final Rating
+              </th>
+              <th className="border border-black p-1 text-center">
+                Remedial Class Mark
+              </th>
+              <th className="border border-black p-1 text-center">
+                Recomputed Final Grade
+              </th>
               <th className="border border-black p-1 text-center">Remarks</th>
             </tr>
           </thead>
@@ -923,7 +1176,10 @@ const EmptySchoolRecordTable = ({ index, grade = "" }) => {
 
 const EmptyCertificationBox = ({ index }) => {
   return (
-    <div className={`certification-box border border-black p-2`} id={`empty-certification-${index}`}>
+    <div
+      className={`certification-box border border-black p-2`}
+      id={`empty-certification-${index}`}
+    >
       <div className="text-center">
         <p className="font-bold">CERTIFICATION</p>
       </div>

@@ -14,13 +14,11 @@ const UserDashboard = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const gradeLevel = sessionStorage.getItem('grade_level');
-        const section = sessionStorage.getItem('section');
-
+        const gradeLevel = sessionStorage.getItem("grade_level");
+        const section = sessionStorage.getItem("section");
 
         const { data: studentData, error: studentError } = await supabase
           .from("StudentData")
@@ -33,7 +31,6 @@ const UserDashboard = () => {
         } else {
           setStudents(studentData);
         }
-
 
         const { data: requestData, error: requestError } = await supabase
           .from("Request")
@@ -56,13 +53,16 @@ const UserDashboard = () => {
     fetchData();
   }, []);
 
-  const uniqueGradeLevels = [...new Set(students.map((item) => item.gradeLevel))];
+  const uniqueGradeLevels = [
+    ...new Set(students.map((item) => item.gradeLevel)),
+  ];
   const uniqueSections = [...new Set(students.map((item) => item.section))];
   const uniqueStatuses = ["Pending", "Approved", "Declined"];
 
-
-  const combinedData = students.map(student => {
-    const studentRequest = requests.find(request => request.student_id === student.lrn);
+  const combinedData = students.map((student) => {
+    const studentRequest = requests.find(
+      (request) => request.student_id === student.lrn
+    );
     return {
       id: student.lrn,
       name: `${student.first_name} ${student.last_name}`,
@@ -71,7 +71,6 @@ const UserDashboard = () => {
       status: studentRequest ? studentRequest.status : "No Request",
     };
   });
-
 
   const filteredData = combinedData.filter((item) => {
     const matchGradeLevel =
@@ -82,7 +81,6 @@ const UserDashboard = () => {
       filters.status === "All" || item.status === filters.status;
     return matchGradeLevel && matchSection && matchStatus;
   });
-
 
   const totalStudents = filteredData.length;
   const sections = new Set(filteredData.map((item) => item.section));
@@ -101,7 +99,7 @@ const UserDashboard = () => {
         return "bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium";
       case "Pending":
         return "bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium";
-      case "Declined":
+      case "Rejected":
         return "bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium";
       case "No Request":
         return "bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium";

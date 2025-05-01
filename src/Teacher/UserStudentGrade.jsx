@@ -18,6 +18,41 @@ const decryptData = (cipherText) => {
   return bytes.toString(CryptoJS.enc.Utf8);
 };
 
+const subjectsForAverage = [
+  "mother_tongue",
+  "filipino",
+  "english",
+  "math",
+  "science",
+  "ap",
+  "epp_tle",
+  "mapeh",
+  "music",
+  "arts",
+  "pe",
+  "health",
+  "ep",
+  "arabic",
+  "islamic",
+];
+
+const calculateAverage = (data) => {
+  let sum = 0;
+  let validSubjectsCount = 0;
+
+  subjectsForAverage.forEach((subject) => {
+    if (data[subject] && !isNaN(parseFloat(data[subject]))) {
+      sum += parseFloat(data[subject]);
+      validSubjectsCount++;
+    }
+  });
+
+  if (validSubjectsCount > 0) {
+    return (sum / validSubjectsCount).toFixed(2);
+  }
+  return "";
+};
+
 const UserStudentGrade = () => {
   const location = useLocation();
   const { lrn, gradeLevel, name, section } = location.state || {};
@@ -46,7 +81,6 @@ const UserStudentGrade = () => {
     average: "",
   });
   const [selectedCard, setSelectedCard] = useState(null);
-
 
   useEffect(() => {
     const fetchGrades = async () => {
@@ -87,6 +121,8 @@ const UserStudentGrade = () => {
                 decryptedGrade[key] = decryptData(decryptedGrade[key]);
               }
             });
+            // Recalculate average
+            decryptedGrade.average = calculateAverage(decryptedGrade);
             return decryptedGrade;
           });
           setGrades(decryptedGrades);
@@ -103,14 +139,21 @@ const UserStudentGrade = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const updatedFormData = { ...formData, [name]: value };
+    if (subjectsForAverage.includes(name)) {
+      updatedFormData.average = calculateAverage(updatedFormData);
+    }
+
+    setFormData(updatedFormData);
   };
 
   const handleOpenModal = (quarter = null) => {
     if (quarter) {
       const selected = grades.find((g) => g.quarter === quarter);
       if (selected) {
-        setFormData(selected);
+        const updatedSelected = { ...selected };
+        updatedSelected.average = calculateAverage(updatedSelected);
+        setFormData(updatedSelected);
       } else {
         setFormData({
           lrn: lrn || "",
@@ -166,8 +209,10 @@ const UserStudentGrade = () => {
 
   const handleSubmit = async () => {
     try {
+      const dataToSubmit = { ...formData };
+      dataToSubmit.average = calculateAverage(dataToSubmit);
 
-      const encryptedFormData = { ...formData };
+      const encryptedFormData = { ...dataToSubmit };
       Object.keys(encryptedFormData).forEach((key) => {
         if (
           [
@@ -194,7 +239,6 @@ const UserStudentGrade = () => {
       });
 
       if (formData.id) {
-
         const { error } = await supabase
           .from("Grades")
           .update(encryptedFormData)
@@ -203,7 +247,6 @@ const UserStudentGrade = () => {
         if (error) {
           console.error("Error updating grade:", error);
         } else {
-
           const { data: updatedGrades, error: fetchError } = await supabase
             .from("Grades")
             .select("*")
@@ -241,14 +284,16 @@ const UserStudentGrade = () => {
                     decryptedGrade[key] = decryptData(decryptedGrade[key]);
                   }
                 });
+                decryptedGrade.average = calculateAverage(decryptedGrade);
                 return decryptedGrade;
               })
             );
           }
         }
       } else {
-
-        const { error } = await supabase.from("Grades").insert([encryptedFormData]);
+        const { error } = await supabase
+          .from("Grades")
+          .insert([encryptedFormData]);
 
         if (error) {
           console.error("Error inserting grade:", error);
@@ -290,6 +335,7 @@ const UserStudentGrade = () => {
                     decryptedGrade[key] = decryptData(decryptedGrade[key]);
                   }
                 });
+                decryptedGrade.average = calculateAverage(decryptedGrade);
                 return decryptedGrade;
               })
             );
@@ -418,32 +464,47 @@ const UserStudentGrade = () => {
                 "arabic",
                 "islamic",
                 "average",
-              ].map((subject) => (
-                <div key={subject}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {subject.replace("_", " ").toUpperCase()}
-                  </label>
-                  <input
-                    type="number"
-                    name={subject}
-                    placeholder="Enter grade"
-                    value={formData[subject] || ""}
-                    onChange={handleInputChange}
-                    className="input input-bordered w-full"
-                  />
-                </div>
-              ))}
+              ].map((subject) =>
+                subject === "average" ? (
+                  <div key={subject}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {subject.replace("_", " ").toUpperCase()}
+                    </label>
+                    <input
+                      type="text"
+                      name={subject}
+                      placeholder="Automatically calculated"
+                      value={formData[subject] || ""}
+                      readOnly
+                      className="input input-bordered w-full bg-gray-100"
+                    />
+                  </div>
+                ) : (
+                  <div key={subject}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {subject.replace("_", " ").toUpperCase()}
+                    </label>
+                    <input
+                      type="number"
+                      name={subject}
+                      placeholder="Enter grade"
+                      value={formData[subject] || ""}
+                      onChange={handleInputChange}
+                      className="input input-bordered w-full"
+                    />
+                  </div>
+                )
+              )}
             </div>
 
             <div className="flex justify-end gap-3 mt-5">
-          <button
-            className="btn btn-primary text-white"
-            onClick={handleSubmit}
-          >
-            {selectedCard ? "Update" : "Save"}
-          </button>
-        </div>
-
+              <button
+                className="btn btn-primary text-white"
+                onClick={handleSubmit}
+              >
+                {selectedCard ? "Update" : "Save"}
+              </button>
+            </div>
           </div>
         </dialog>
       </main>
