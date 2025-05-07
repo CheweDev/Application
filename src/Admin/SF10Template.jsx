@@ -94,7 +94,7 @@ const SF10Template = () => {
               };
 
               const record = {
-                school: " Magallanes Elementary School",
+                school: " Magallanes Central Elementary School",
                 district: "Magallanes",
                 division: "Agusan Del Norte",
                 grade: gradeLevel,
@@ -771,6 +771,17 @@ const SF10Template = () => {
 };
 
 const SchoolRecordTable = ({ record, index }) => {
+  const [schoolYear, setSchoolYear] = useState(record.schoolYear || "");
+  const [adviser, setAdviser] = useState(record.adviser || "");
+
+  const handleSchoolYearChange = (e) => {
+    setSchoolYear(e.target.value);
+  };
+
+  const handleAdviserChange = (e) => {
+    setAdviser(e.target.value);
+  };
+
   return (
     <div
       className={`school-record-table border border-black p-1`}
@@ -839,10 +850,13 @@ const SchoolRecordTable = ({ record, index }) => {
         </div>
         <div className="col-span-4">
           <div className="flex items-center">
-            <span className="font-bold mr-1">School Year:</span>
-            <span className="border-b border-black flex-1">
-              {record.schoolYear}
-            </span>
+            <span className="font-bold">School Year:</span>
+            <input
+              type="text"
+              value={schoolYear}
+              onChange={handleSchoolYearChange}
+              className="border-b border-black w-24 ml-1 mb-1"
+            />
           </div>
         </div>
       </div>
@@ -850,10 +864,13 @@ const SchoolRecordTable = ({ record, index }) => {
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-8">
           <div className="flex items-center">
-            <span className="font-bold mr-1">Name of Adviser/Teacher:</span>
-            <span className="border-b border-black flex-1">
-              {record.adviser}
-            </span>
+            <span className="font-bold mr-1">Name of Adviser:</span>
+            <input
+              type="text"
+              value={adviser}
+              onChange={handleAdviserChange}
+              className="border-b border-black flex-1 px-1 mt-1 focus:outline-none"
+            />
           </div>
         </div>
         <div className="col-span-4">
@@ -1050,7 +1067,7 @@ const EmptySchoolRecordTable = ({ index, grade = "" }) => {
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-8">
           <div className="flex items-center">
-            <span className="font-bold mr-1">Name of Adviser/Teacher:</span>
+            <span className="font-bold mr-1">Name of Adviser:</span>
             <span className="border-b border-black flex-1"></span>
           </div>
         </div>
