@@ -36,6 +36,21 @@ const subjectsForAverage = [
   "islamic",
 ];
 
+const requiredSubjects = [
+  "mother_tongue",
+  "filipino",
+  "english",
+  "math",
+  "science",
+  "ap",
+  "epp_tle",
+  "mapeh",
+  "music",
+  "arts",
+  "pe",
+  "health",
+];
+
 const calculateAverage = (data) => {
   let sum = 0;
   let validSubjectsCount = 0;
@@ -81,6 +96,7 @@ const UserStudentGrade = () => {
     average: "",
   });
   const [selectedCard, setSelectedCard] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
     const fetchGrades = async () => {
@@ -140,6 +156,13 @@ const UserStudentGrade = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const updatedFormData = { ...formData, [name]: value };
+
+    // Clear error for this field when user types
+    setFormErrors({
+      ...formErrors,
+      [name]: "",
+    });
+
     if (subjectsForAverage.includes(name)) {
       updatedFormData.average = calculateAverage(updatedFormData);
     }
@@ -148,6 +171,9 @@ const UserStudentGrade = () => {
   };
 
   const handleOpenModal = (quarter = null) => {
+    // Reset form errors when opening modal
+    setFormErrors({});
+
     if (quarter) {
       const selected = grades.find((g) => g.quarter === quarter);
       if (selected) {
@@ -207,7 +233,63 @@ const UserStudentGrade = () => {
     modalRef.current?.showModal();
   };
 
+  const validateForm = () => {
+    const errors = {};
+    let isValid = true;
+
+    // Validate required subjects
+    requiredSubjects.forEach((subject) => {
+      if (!formData[subject] || formData[subject].trim() === "") {
+        errors[subject] = `${subject
+          .replace("_", " ")
+          .toUpperCase()} is required`;
+        isValid = false;
+      } else if (isNaN(parseFloat(formData[subject]))) {
+        errors[subject] = `${subject
+          .replace("_", " ")
+          .toUpperCase()} must be a number`;
+        isValid = false;
+      } else if (
+        parseFloat(formData[subject]) < 60 ||
+        parseFloat(formData[subject]) > 100
+      ) {
+        errors[subject] = `${subject
+          .replace("_", " ")
+          .toUpperCase()} must be between 60 and 100`;
+        isValid = false;
+      }
+    });
+
+    // Validate optional subjects if filled
+    ["ep", "arabic", "islamic"].forEach((subject) => {
+      if (formData[subject] && formData[subject].trim() !== "") {
+        if (isNaN(parseFloat(formData[subject]))) {
+          errors[subject] = `${subject
+            .replace("_", " ")
+            .toUpperCase()} must be a number`;
+          isValid = false;
+        } else if (
+          parseFloat(formData[subject]) < 60 ||
+          parseFloat(formData[subject]) > 100
+        ) {
+          errors[subject] = `${subject
+            .replace("_", " ")
+            .toUpperCase()} must be between 60 and 100`;
+          isValid = false;
+        }
+      }
+    });
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
   const handleSubmit = async () => {
+    if (!validateForm()) {
+      alert("Please fill in all required grades correctly before submitting.");
+      return;
+    }
+
     try {
       const dataToSubmit = { ...formData };
       dataToSubmit.average = calculateAverage(dataToSubmit);
@@ -246,6 +328,7 @@ const UserStudentGrade = () => {
 
         if (error) {
           console.error("Error updating grade:", error);
+          alert("Error updating grades. Please try again.");
         } else {
           const { data: updatedGrades, error: fetchError } = await supabase
             .from("Grades")
@@ -288,6 +371,7 @@ const UserStudentGrade = () => {
                 return decryptedGrade;
               })
             );
+            alert("Grades updated successfully!");
           }
         }
       } else {
@@ -297,6 +381,7 @@ const UserStudentGrade = () => {
 
         if (error) {
           console.error("Error inserting grade:", error);
+          alert("Error adding grades. Please try again.");
         } else {
           const { data: updatedGrades, error: fetchError } = await supabase
             .from("Grades")
@@ -339,14 +424,16 @@ const UserStudentGrade = () => {
                 return decryptedGrade;
               })
             );
+            alert("Grades added successfully!");
           }
         }
       }
+
+      modalRef.current.close();
     } catch (err) {
       console.error("Unexpected error:", err);
+      alert("An unexpected error occurred. Please try again.");
     }
-
-    modalRef.current.close();
   };
 
   const handleDelete = async () => {
@@ -361,11 +448,14 @@ const UserStudentGrade = () => {
 
       if (error) {
         console.error("Error deleting grade:", error);
+        alert("Error deleting grades. Please try again.");
       } else {
+        alert("Grades deleted successfully!");
         window.location.reload();
       }
     } catch (err) {
       console.error("Unexpected error:", err);
+      alert("An unexpected error occurred. Please try again.");
     }
 
     modalRef.current.close();
@@ -376,7 +466,7 @@ const UserStudentGrade = () => {
       <UserSidebar />
       <main className="flex-1 p-6 lg:ml-64">
         <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-6">
             <button
               onClick={() => window.history.back()}
               className="text-gray-700 hover:bg-gray-700 hover:text-white cursor-pointer rounded-full p-1"
@@ -395,7 +485,7 @@ const UserStudentGrade = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 border-b p-4 border-gray-400">
           {grades.length > 0 ? (
             grades.map((grade) => (
               <div
@@ -415,6 +505,7 @@ const UserStudentGrade = () => {
             </p>
           )}
         </div>
+
         <dialog ref={modalRef} className="modal">
           <div className="modal-box">
             <form method="dialog">
@@ -483,27 +574,59 @@ const UserStudentGrade = () => {
                   <div key={subject}>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       {subject.replace("_", " ").toUpperCase()}
+                      {requiredSubjects.includes(subject) && (
+                        <span className="text-red-500">*</span>
+                      )}
                     </label>
                     <input
                       type="number"
                       name={subject}
-                      placeholder="Enter grade"
+                      placeholder={
+                        requiredSubjects.includes(subject)
+                          ? "Required"
+                          : "Enter grade"
+                      }
                       value={formData[subject] || ""}
                       onChange={handleInputChange}
-                      className="input input-bordered w-full"
+                      className={`input input-bordered w-full ${
+                        formErrors[subject] ? "input-error" : ""
+                      }`}
+                      min="60"
+                      max="100"
+                      required={requiredSubjects.includes(subject)}
                     />
+                    {formErrors[subject] && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {formErrors[subject]}
+                      </p>
+                    )}
                   </div>
                 )
               )}
             </div>
 
-            <div className="flex justify-end gap-3 mt-5">
+            <div className="flex justify-end gap-2 mt-5">
               <button
                 className="btn btn-primary text-white"
                 onClick={handleSubmit}
               >
                 {selectedCard ? "Update" : "Save"}
               </button>
+              {selectedCard && (
+                <button
+                  className="btn btn-error text-white"
+                  onClick={handleDelete}
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+
+            <div className="mt-5 italic text-xs text-gray-600">
+              <p>
+                * Required fields. All required grades must be entered before
+                submission. Grades must be between 60 and 100.
+              </p>
             </div>
           </div>
         </dialog>

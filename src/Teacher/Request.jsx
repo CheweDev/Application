@@ -151,6 +151,7 @@ const Request = () => {
                 <th>Section</th>
                 <th>Status</th>
                 <th>Date Requested</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
