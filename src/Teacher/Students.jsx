@@ -19,6 +19,7 @@ const Students = () => {
     gradeLevel: "",
     section: "",
     school_year: "",
+    adviser: "",
   });
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,6 +74,7 @@ const Students = () => {
         gradeLevel: "",
         section: "",
         school_year: "",
+        adviser: "",
       });
     }
     modalRef.current?.showModal();
@@ -138,6 +140,7 @@ const Students = () => {
         gradeLevel,
         section,
         school_year,
+        adviser,
       } = formData;
 
       if (selectedStudent) {
@@ -155,6 +158,7 @@ const Students = () => {
               gradeLevel,
               section,
               school_year,
+              adviser,
             })
             .eq("lrn", selectedStudent.lrn);
 
@@ -192,6 +196,7 @@ const Students = () => {
               gradeLevel,
               section,
               school_year,
+              adviser,
             },
           ]);
 
@@ -309,7 +314,7 @@ const Students = () => {
                         className="btn btn-sm btn-outline btn-info hover:text-white"
                         onClick={() => handleOpenModal(student)}
                       >
-                        Edit Info
+                        View Info
                       </button>
                       <Link
                         to={{
@@ -348,7 +353,7 @@ const Students = () => {
               </button>
             </form>
             <h3 className="font-bold text-lg mb-4 text-gray-800">
-              {selectedStudent ? "Edit Student" : "Add Student"}
+              {selectedStudent ? "View Student Information" : "Add Student"}
             </h3>
 
             {formError && (
@@ -454,6 +459,7 @@ const Students = () => {
                   onChange={handleInputChange}
                   className="select select-bordered w-full"
                   required
+                  disabled={!!selectedStudent}
                 >
                   <option value="">Select Grade Level</option>
                   <option value="Grade 1">Grade 1</option>
@@ -474,6 +480,19 @@ const Students = () => {
                   onChange={handleInputChange}
                   className="input input-bordered w-full"
                   required
+                  disabled={!!selectedStudent}
+                />
+              </div>
+
+              <div className="form-control">
+                <input
+                  type="text"
+                  name="adviser"
+                  placeholder="Adviser Name"
+                  value={formData.adviser}
+                  onChange={handleInputChange}
+                  className="input input-bordered w-full"
+                  disabled={!!selectedStudent}
                 />
               </div>
 
@@ -497,22 +516,20 @@ const Students = () => {
                 onClick={() => modalRef.current.close()}
                 type="button"
               >
-                Cancel
+                Close
               </button>
-              <button
-                className="btn btn-primary text-white"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                type="button"
-              >
-                {isSubmitting ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : selectedStudent ? (
-                  "Update"
-                ) : (
-                  "Add"
-                )}
-              </button>
+              {!selectedStudent && (
+                <button
+                  className="btn btn-primary text-white"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  type="button"
+                >
+                  {isSubmitting ? (
+                    <span className="loading loading-spinner loading-sm"></span>
+                  ) : "Add"}
+                </button>
+              )}
             </div>
           </div>
         </dialog>
