@@ -26,7 +26,8 @@ const SF10Template = () => {
         setLoading(true);
         setError(null);
 
-        const { lrn, gradeLevel, name, birthdate, sex } = location.state || {};
+        const { lrn, gradeLevel, name, birthdate, sex, middleName } = location.state || {};
+     
 
         if (!lrn || !name) {
           throw new Error("Missing required student data");
@@ -43,6 +44,18 @@ const SF10Template = () => {
           throw new Error("No grades found for this student");
         }
 
+        const { data: advisoryRecords, error: advisoryError } = await supabase
+          .from("Advisory")
+          .select("*")
+          .eq("lrn", lrn);
+
+        if (advisoryError) throw advisoryError;
+
+        const advisoryByGrade = (advisoryRecords || []).reduce((acc, rec) => {
+          acc[rec.grade] = rec;
+          return acc;
+        }, {});
+
         const gradesByLevel = grades.reduce((acc, grade) => {
           if (!acc[grade.grade_level]) {
             acc[grade.grade_level] = [];
@@ -55,7 +68,7 @@ const SF10Template = () => {
           lastName: name.split(" ")[1] || "",
           firstName: name.split(" ")[0] || "",
           nameExtn: "",
-          middleName: "",
+          middleName: middleName || "",
           lrn: lrn,
           birthdate: birthdate || "",
           sex: sex || "",
@@ -85,6 +98,7 @@ const SF10Template = () => {
               }
 
               const firstRecord = gradeRecords[0];
+              const advisory = advisoryByGrade[gradeLevel];
 
               const quarterMap = {
                 "1st Quarter": "q1",
@@ -99,9 +113,9 @@ const SF10Template = () => {
                 division: "Agusan Del Norte",
                 grade: gradeLevel,
                 section: firstRecord?.section || "",
-                adviser: firstRecord?.adviser || "",
+                adviser: advisory?.adviser || firstRecord?.adviser || "",
                 schoolId: "131485",
-                schoolYear: firstRecord?.school_year || "",
+                schoolYear: advisory?.school_year || firstRecord?.school_year || "",
                 region: "Caraga",
                 signature: firstRecord?.adviser_signature || "",
 

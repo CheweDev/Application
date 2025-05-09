@@ -1,15 +1,24 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar.jsx";
 import * as XLSX from "xlsx";
 import supabase from "../Supabase.jsx";
 import { RiFileExcel2Fill } from "react-icons/ri";
+import { ImSpinner8 } from "react-icons/im";
 
 const AcademicRecords = () => {
   const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSchoolYear, setSelectedSchoolYear] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [promotionData, setPromotionData] = useState({
+    gradeLevel: "",
+    section: "",
+    school_year: "",
+    adviser: "",
+  });
+  const [isPromoting, setIsPromoting] = useState(false);
   const [formData, setFormData] = useState({
     last_name: "",
     first_name: "",
@@ -17,12 +26,23 @@ const AcademicRecords = () => {
     lrn: "",
     birthdate: "",
     sex: "Male",
-    gradeLevel: "",
+    gradeLevel: "Grade 1",
     section: "",
     school_year: "",
+    adviser: "",
   });
 
   const modalRef = useRef(null);
+  const promotionModalRef = useRef(null);
+
+  const sections = [
+    "Section A",
+    "Section B",
+    "Section C",
+    "Section D",
+    "Section E",
+    "Section F",
+  ];
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -58,15 +78,109 @@ const AcademicRecords = () => {
         lrn: "",
         birthdate: "",
         sex: "Male",
-        gradeLevel: "",
+        gradeLevel: "Grade 1",
         section: "",
         school_year: "",
+        adviser: "",
       });
     }
     modalRef.current?.showModal();
   };
 
+  const handleOpenPromotionModal = useCallback(async (student) => {
+    // Fetch grades for the student's current gradeLevel
+    try {
+      const { data: grades, error } = await supabase
+        .from("Grades")
+        .select("quarter")
+        .eq("lrn", student.lrn)
+        .eq("grade_level", student.gradeLevel);
+
+      if (error) {
+        alert("Error fetching grades for promotion check.");
+        return;
+      }
+
+      const quarters = grades ? grades.map(g => g.quarter) : [];
+      const requiredQuarters = [
+        "1st Quarter",
+        "2nd Quarter",
+        "3rd Quarter",
+        "4th Quarter"
+      ];
+      const hasAllQuarters = requiredQuarters.every(q => quarters.includes(q));
+
+      if (!hasAllQuarters) {
+        alert("Cannot promote: Student does not have grades for all 4 quarters in their current grade level.");
+        return;
+      }
+
+      setSelectedStudent(student);
+      setPromotionData({
+        gradeLevel: "",
+        section: "",
+        school_year: "",
+        adviser: "",
+      });
+      promotionModalRef.current?.showModal();
+    } catch (err) {
+      alert("Unexpected error during promotion check.");
+    }
+  }, []);
+
+  const handlePromotionInputChange = (e) => {
+    setPromotionData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handlePromotion = async () => {
+    if (isPromoting) return;
+    setIsPromoting(true);
+
+    try {
+      // Update StudentData
+      const { error: studentError } = await supabase
+        .from("StudentData")
+        .update({
+          gradeLevel: promotionData.gradeLevel,
+          section: promotionData.section,
+          school_year: promotionData.school_year,
+        })
+        .eq("lrn", selectedStudent.lrn);
+
+      if (studentError) {
+        console.error("Error updating student:", studentError);
+        setIsPromoting(false);
+        return;
+      }
+
+      // Insert into Advisory
+      const { error: advisoryError } = await supabase.from("Advisory").insert([
+        {
+          lrn: selectedStudent.lrn,
+          grade: promotionData.gradeLevel,
+          section: promotionData.section,
+          adviser: promotionData.adviser,
+          school_year: promotionData.school_year,
+        },
+      ]);
+
+      if (advisoryError) {
+        console.error("Error inserting advisory data:", advisoryError);
+      }
+
+      window.location.reload();
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    } finally {
+      setIsPromoting(false);
+      promotionModalRef.current?.close();
+    }
+  };
+
   const handleSubmit = async () => {
+    if (isSubmitting) return; // Prevent multiple submissions
+    
+    setIsSubmitting(true);
     const {
       last_name,
       first_name,
@@ -77,6 +191,7 @@ const AcademicRecords = () => {
       gradeLevel,
       section,
       school_year,
+      adviser,
     } = formData;
 
     if (selectedStudent) {
@@ -103,10 +218,13 @@ const AcademicRecords = () => {
         }
       } catch (err) {
         console.error("Unexpected error:", err);
+      } finally {
+        setIsSubmitting(false);
       }
     } else {
       try {
-        const { error } = await supabase.from("StudentData").insert([
+        // Insert into StudentData table
+        const { error: studentError } = await supabase.from("StudentData").insert([
           {
             last_name,
             first_name,
@@ -120,13 +238,32 @@ const AcademicRecords = () => {
           },
         ]);
 
-        if (error) {
-          console.error("Error inserting student:", error);
-        } else {
-          window.location.reload();
+        if (studentError) {
+          console.error("Error inserting student:", studentError);
+          setIsSubmitting(false);
+          return;
         }
+
+        // Insert into Advisory table
+        const { error: advisoryError } = await supabase.from("Advisory").insert([
+          {
+            lrn,
+            grade: gradeLevel,
+            section,
+            adviser,
+            school_year,
+          },
+        ]);
+
+        if (advisoryError) {
+          console.error("Error inserting advisory data:", advisoryError);
+        }
+
+        window.location.reload();
       } catch (err) {
         console.error("Unexpected error:", err);
+      } finally {
+        setIsSubmitting(false);
       }
     }
 
@@ -223,82 +360,91 @@ const AcademicRecords = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-box border border-base-content/5 bg-white shadow-md">
-          <table className="table w-full">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Last Name</th>
-                <th>First Name</th>
-                <th>Middle Name</th>
-                <th>LRN</th>
-                <th>Birthdate</th>
-                <th>Sex</th>
-                <th>Grade Level</th>
-                <th>School Year</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredStudents.length > 0 ? (
-                filteredStudents.map((student, index) => (
-                  <tr key={student.lrn}>
-                    <th>{index + 1}</th>
-                    <td>{student.last_name}</td>
-                    <td>{student.first_name}</td>
-                    <td>{student.middle_name}</td>
-                    <td>{student.lrn}</td>
-                    <td>{student.birthdate}</td>
-                    <td>{student.sex}</td>
-                    <td>{student.gradeLevel}</td>
-                    <td>{student.school_year}</td>
-                    <td className="flex gap-2">
-                      <button
-                        className="btn btn-sm btn-outline btn-info hover:text-white"
-                        onClick={() => handleOpenModal(student)}
-                      >
-                        Edit Info
-                      </button>
-                      <Link
-                        to={{
-                          pathname: "/student-grade",
-                        }}
-                        state={{
-                          lrn: student.lrn,
-                          gradeLevel: student.gradeLevel,
-                          name: `${student.first_name} ${student.last_name}`,
-                        }}
-                        className="btn btn-sm btn-outline btn-warning hover:text-white"
-                      >
-                        View Grades
-                      </Link>
-                      <Link
-                        to={{
-                          pathname: "/template",
-                        }}
-                        state={{
-                          lrn: student.lrn,
-                          gradeLevel: student.gradeLevel,
-                          name: `${student.first_name} ${student.last_name}`,
-                          birthdate: student.birthdate,
-                          sex: student.sex,
-                        }}
-                        className="btn btn-sm btn-outline btn-success hover:text-white"
-                      >
-                        Print
-                      </Link>
+        <div className="rounded-box border border-base-content/5 bg-white shadow-md">
+          <div className="overflow-x-auto">
+            <table className="table w-full">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Last Name</th>
+                  <th>First Name</th>
+                  <th>Middle Name</th>
+                  <th>LRN</th>
+                  <th>Birthdate</th>
+                  <th>Sex</th>
+                  <th>Grade Level</th>
+                  <th>School Year</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStudents.length > 0 ? (
+                  filteredStudents.map((student, index) => (
+                    <tr key={student.lrn}>
+                      <th>{index + 1}</th>
+                      <td>{student.last_name}</td>
+                      <td>{student.first_name}</td>
+                      <td>{student.middle_name}</td>
+                      <td>{student.lrn}</td>
+                      <td>{student.birthdate}</td>
+                      <td>{student.sex}</td>
+                      <td>{student.gradeLevel}</td>
+                      <td>{student.school_year}</td>
+                      <td className="flex gap-2">
+                        <button
+                          className="btn btn-sm btn-outline btn-info hover:text-white"
+                          onClick={() => handleOpenModal(student)}
+                        >
+                          View Info
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline btn-primary hover:text-white"
+                          onClick={() => handleOpenPromotionModal(student)}
+                        >
+                          Promote
+                        </button>
+                        <Link
+                          to={{
+                            pathname: "/student-grade",
+                          }}
+                          state={{
+                            lrn: student.lrn,
+                            gradeLevel: student.gradeLevel,
+                            name: `${student.first_name} ${student.last_name}`,
+                          }}
+                          className="btn btn-sm btn-outline btn-warning hover:text-white"
+                        >
+                          View Grades
+                        </Link>
+                        <Link
+                          to={{
+                            pathname: "/template",
+                          }}
+                          state={{
+                            lrn: student.lrn,
+                            gradeLevel: student.gradeLevel,
+                            name: `${student.first_name} ${student.last_name}`,
+                            middleName: student.middle_name,
+                            birthdate: student.birthdate,
+                            sex: student.sex,
+                          }}
+                          className="btn btn-sm btn-outline btn-success hover:text-white"
+                        >
+                          Print
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="10" className="text-center text-gray-500">
+                      No student records found.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="10" className="text-center text-gray-500">
-                    No student records found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Add/Edit Modal */}
@@ -310,7 +456,7 @@ const AcademicRecords = () => {
               </button>
             </form>
             <h3 className="font-bold text-lg mb-4 text-gray-800">
-              {selectedStudent ? "Edit Student" : "Add Student"}
+              {selectedStudent ? "View Student Information" : "Add Student"}
             </h3>
             <div className="flex flex-col gap-3">
               <input
@@ -372,7 +518,8 @@ const AcademicRecords = () => {
                 value={formData.gradeLevel}
                 onChange={handleInputChange}
                 className="select select-bordered w-full"
-              >
+                disabled={!!selectedStudent}
+              > <option value="">Select Grade Level</option>
                 <option value="Grade 1">Grade 1</option>
                 <option value="Grade 2">Grade 2</option>
                 <option value="Grade 3">Grade 3</option>
@@ -380,14 +527,18 @@ const AcademicRecords = () => {
                 <option value="Grade 5">Grade 5</option>
                 <option value="Grade 6">Grade 6</option>
               </select>
-              <input
-                type="text"
+              <select
                 name="section"
-                placeholder="Section"
                 value={formData.section}
                 onChange={handleInputChange}
-                className="input input-bordered w-full"
-              />
+                className="select select-bordered w-full"
+                disabled={!!selectedStudent}
+              >
+                <option value="">Select Section</option>
+                {sections.map((section) => (
+                  <option key={section} value={section}>{section}</option>
+                ))}
+              </select>
               <input
                 type="text"
                 name="school_year"
@@ -397,17 +548,121 @@ const AcademicRecords = () => {
                 className="input input-bordered w-full"
                 disabled={!!selectedStudent}
               />
+              <input
+                type="text"
+                name="adviser"
+                placeholder="Adviser Name"
+                value={formData.adviser}
+                onChange={handleInputChange}
+                className="input input-bordered w-full"
+                disabled={!!selectedStudent}
+              />
             </div>
 
             <div className="flex justify-end gap-3 mt-5">
-              <button className="btn" onClick={() => modalRef.current.close()}>
+              <button 
+                className="btn" 
+                onClick={() => modalRef.current.close()}
+                disabled={isSubmitting}
+              >
+                Close
+              </button>
+              {!selectedStudent && (
+                <button
+                  className="btn btn-primary text-white"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <ImSpinner8 className="animate-spin" />
+                      Submitting...
+                    </span>
+                  ) : (
+                    "Add"
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </dialog>
+
+        {/* Promotion Modal */}
+        <dialog id="promotion_modal" className="modal" ref={promotionModalRef}>
+          <div className="modal-box">
+            <form method="dialog">
+              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+                ✕
+              </button>
+            </form>
+            <h3 className="font-bold text-lg mb-4 text-gray-800">
+              Promote Student
+            </h3>
+            <div className="flex flex-col gap-3">
+              <select
+                name="gradeLevel"
+                value={promotionData.gradeLevel}
+                onChange={handlePromotionInputChange}
+                className="select select-bordered w-full"
+              >
+                <option value="">Select Grade Level</option>
+                <option value="Grade 1">Grade 1</option>
+                <option value="Grade 2">Grade 2</option>
+                <option value="Grade 3">Grade 3</option>
+                <option value="Grade 4">Grade 4</option>
+                <option value="Grade 5">Grade 5</option>
+                <option value="Grade 6">Grade 6</option>
+              </select>
+              <select
+                name="section"
+                value={promotionData.section}
+                onChange={handlePromotionInputChange}
+                className="select select-bordered w-full"
+              >
+                <option value="">Select Section</option>
+                {sections.map((section) => (
+                  <option key={section} value={section}>{section}</option>
+                ))}
+              </select>
+              <input
+                type="text"
+                name="school_year"
+                placeholder="School Year (e.g., 2023-2024)"
+                value={promotionData.school_year}
+                onChange={handlePromotionInputChange}
+                className="input input-bordered w-full"
+              />
+              <input
+                type="text"
+                name="adviser"
+                placeholder="Adviser Name"
+                value={promotionData.adviser}
+                onChange={handlePromotionInputChange}
+                className="input input-bordered w-full"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 mt-5">
+              <button 
+                className="btn" 
+                onClick={() => promotionModalRef.current.close()}
+                disabled={isPromoting}
+              >
                 Cancel
               </button>
               <button
                 className="btn btn-primary text-white"
-                onClick={handleSubmit}
+                onClick={handlePromotion}
+                disabled={isPromoting}
               >
-                {selectedStudent ? "Update" : "Add"}
+                {isPromoting ? (
+                  <span className="flex items-center gap-2">
+                    <ImSpinner8 className="animate-spin" />
+                    Promoting...
+                  </span>
+                ) : (
+                  "Promote"
+                )}
               </button>
             </div>
           </div>
