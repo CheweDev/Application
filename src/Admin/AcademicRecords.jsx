@@ -9,6 +9,7 @@ import { ImSpinner8 } from "react-icons/im";
 const AcademicRecords = () => {
   const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [schoolYears, setSchoolYears] = useState([]);
   const [selectedSchoolYear, setSelectedSchoolYear] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,10 +50,30 @@ const AcademicRecords = () => {
         console.error("Unexpected error:", err);
       }
     };
-
+  
+    const fetchSchoolYears = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("StudentData")
+          .select("school_year")
+          .neq("school_year", null)
+          .order("school_year", { ascending: false });
+  
+        if (error) {
+          console.error("Error fetching school years:", error);
+        } else {
+          const uniqueYears = [...new Set(data.map((item) => item.school_year))];
+          setSchoolYears(uniqueYears);
+        }
+      } catch (err) {
+        console.error("Unexpected error fetching school years:", err);
+      }
+    };
+  
     fetchStudents();
+    fetchSchoolYears();
   }, []);
-
+  
   const handleInputChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -232,15 +253,13 @@ const AcademicRecords = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <div className="flex gap-2">
-            <select
+          <select
               className="select select-bordered"
               value={selectedSchoolYear}
               onChange={(e) => setSelectedSchoolYear(e.target.value)}
             >
               <option value="">All School Years</option>
-              {Array.from(
-                new Set(students.map((student) => student.school_year))
-              ).map((uniqueYear) => (
+              {schoolYears.map((uniqueYear) => (
                 <option key={uniqueYear} value={uniqueYear}>
                   {uniqueYear}
                 </option>
