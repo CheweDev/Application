@@ -250,6 +250,17 @@ const Login = () => {
                 )}
               </button>
             </div>
+
+            <div className="mt-4 text-center">
+              <a 
+                href="https://mces.online/landingpage.php" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-black-600 underline hover:text-black-800 hover:underline"
+              >
+                Go to landing page
+              </a>
+            </div>
           </form>
         </div>
       </div>
