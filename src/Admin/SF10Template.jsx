@@ -83,7 +83,7 @@ const SF10Template = () => {
           },
           nameOfSchool: "Magallanes Central Elementary School",
           schoolId: "131485",
-          addressOfSchool: "Purok 1, Brgy. Magallanes, Butuan City",
+          addressOfSchool: "Magallanes Agusan Del Norte",
           nameAndAddressOfTestingCenter: "",
           remark: "",
 
