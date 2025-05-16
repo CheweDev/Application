@@ -81,9 +81,9 @@ const SF10Template = () => {
             examDate: "",
             otherSpecify: "",
           },
-          nameOfSchool: "",
-          schoolId: "",
-          addressOfSchool: "",
+          nameOfSchool: "Magallanes Central Elementary School",
+          schoolId: "131485",
+          addressOfSchool: "Purok 1, Brgy. Magallanes, Butuan City",
           nameAndAddressOfTestingCenter: "",
           remark: "",
 
@@ -769,8 +769,8 @@ const SF10Template = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-2 mt-4">
-            <EmptySchoolRecordTable index={6} grade="Grade 7" />
-            <EmptySchoolRecordTable index={7} grade="Grade 8" />
+            <EmptySchoolRecordTable index={6}/>
+            <EmptySchoolRecordTable index={7} />
           </div>
 
           <div className="mt-4 space-y-4">
