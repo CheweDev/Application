@@ -162,7 +162,7 @@ const AdminSidebar = () => {
         </nav>
 
         <div className="px-4 py-2 text-xs text-gray-500 border-t border-[#3c4a5c]">
-          <p>©2025 Developed by BSIT 2025</p>
+          <p>Devs: Guendoline, Geo, Ericka</p>
         </div>
       </div>
 

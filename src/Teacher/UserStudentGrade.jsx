@@ -63,7 +63,8 @@ const calculateAverage = (data) => {
   });
 
   if (validSubjectsCount > 0) {
-    return (sum / validSubjectsCount).toFixed(2);
+    // return (sum / validSubjectsCount).toFixed(2);
+    return Math.round(sum / validSubjectsCount).toString();
   }
   return "";
 };

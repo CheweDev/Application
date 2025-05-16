@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaSignInAlt } from "react-icons/fa";
 import supabase from "../Supabase";
+import { FaLongArrowAltLeft } from "react-icons/fa";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,7 +19,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-  
+
     try {
       const { data, error } = await supabase
         .from("Users")
@@ -27,24 +28,24 @@ const Login = () => {
         .eq("password", password)
         .eq("role", role)
         .single();
-  
+
       if (error || !data) {
         console.error("Error fetching data or no data found:", error);
         openModal();
       } else {
         const status = data.status?.trim().toLowerCase();
-        if (status === 'pending' || status === 'blocked') {
+        if (status === "pending" || status === "blocked") {
           openStatusModal();
-          return; 
+          return;
         }
-  
+
         console.log("Login successful:", data);
         console.log(`${data.status}`);
-  
-        sessionStorage.setItem('grade_level', data.grade_level || '');
-        sessionStorage.setItem('name', data.name || '');
-        sessionStorage.setItem('section', data.section || '');
-  
+
+        sessionStorage.setItem("grade_level", data.grade_level || "");
+        sessionStorage.setItem("name", data.name || "");
+        sessionStorage.setItem("section", data.section || "");
+
         if (role === "ADMIN") {
           navigate("/admin-dashboard");
         } else if (role === "TEACHER") {
@@ -57,7 +58,6 @@ const Login = () => {
       setIsLoading(false);
     }
   };
-  
 
   const openModal = () => {
     const modal = document.getElementById("error_modal");
@@ -251,14 +251,15 @@ const Login = () => {
               </button>
             </div>
 
-            <div className="mt-4 text-center">
-              <a 
-                href="https://mces.online/landingpage.php" 
-                target="_blank" 
+            <div className="mt-10 flex justify-end">
+              <a
+                href="https://mces.online/landingpage.php"
+                target="_blank"
                 rel="noopener noreferrer"
-                className="text-black-600 underline hover:text-black-800 hover:underline"
+                className="text-gray-700 flex gap-2 hover:underline"
               >
-                Go to landing page
+                <FaLongArrowAltLeft size={17} className="mt-1" />
+                Landing Page
               </a>
             </div>
           </form>
@@ -276,7 +277,9 @@ const Login = () => {
             </button>
           </form>
           <h3 className="font-bold text-lg text-red-500">Login Failed</h3>
-          <p className="py-4">Invalid email, password, or role. Please try again.</p>
+          <p className="py-4">
+            Invalid email, password, or role. Please try again.
+          </p>
         </div>
       </dialog>
 
@@ -292,7 +295,8 @@ const Login = () => {
           </form>
           <h3 className="font-bold text-lg text-yellow-500">Account On Hold</h3>
           <p className="py-4">
-            Your account is currently on hold. Please contact the administrator for assistance.
+            Your account is currently on hold. Please contact the administrator
+            for assistance.
           </p>
         </div>
       </dialog>

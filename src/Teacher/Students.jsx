@@ -204,20 +204,22 @@ const Students = () => {
 
         try {
           // Insert into StudentData table
-          const { error: studentError } = await supabase.from("StudentData").insert([
-            {
-              last_name,
-              first_name,
-              middle_name,
-              lrn,
-              birthdate,
-              sex,
-              gradeLevel,
-              section,
-              school_year,
-              adviser,
-            },
-          ]);
+          const { error: studentError } = await supabase
+            .from("StudentData")
+            .insert([
+              {
+                last_name,
+                first_name,
+                middle_name,
+                lrn,
+                birthdate,
+                sex,
+                gradeLevel,
+                section,
+                school_year,
+                adviser,
+              },
+            ]);
 
           if (studentError) {
             console.error("Error inserting student:", studentError);
@@ -227,15 +229,17 @@ const Students = () => {
           }
 
           // Insert into Advisory table
-          const { error: advisoryError } = await supabase.from("Advisory").insert([
-            {
-              lrn,
-              grade: gradeLevel,
-              section,
-              adviser,
-              school_year,
-            },
-          ]);
+          const { error: advisoryError } = await supabase
+            .from("Advisory")
+            .insert([
+              {
+                lrn,
+                grade: gradeLevel,
+                section,
+                adviser,
+                school_year,
+              },
+            ]);
 
           if (advisoryError) {
             console.error("Error inserting advisory data:", advisoryError);
@@ -296,17 +300,21 @@ const Students = () => {
         return;
       }
 
-      const quarters = grades ? grades.map(g => g.quarter) : [];
+      const quarters = grades ? grades.map((g) => g.quarter) : [];
       const requiredQuarters = [
         "1st Quarter",
         "2nd Quarter",
         "3rd Quarter",
-        "4th Quarter"
+        "4th Quarter",
       ];
-      const hasAllQuarters = requiredQuarters.every(q => quarters.includes(q));
+      const hasAllQuarters = requiredQuarters.every((q) =>
+        quarters.includes(q)
+      );
 
       if (!hasAllQuarters) {
-        alert("Cannot promote: Student does not have grades for all 4 quarters in their current grade level.");
+        alert(
+          "Cannot promote: Student does not have grades for all 4 quarters in their current grade level."
+        );
         return;
       }
 
@@ -444,7 +452,7 @@ const Students = () => {
                         View Info
                       </button>
                       <button
-                        className="btn btn-sm btn-outline btn-primary hover:text-white"
+                        className="btn btn-sm btn-outline btn-success hover:text-white"
                         onClick={() => handleOpenPromotionModal(student)}
                       >
                         Promote
@@ -660,7 +668,9 @@ const Students = () => {
                 >
                   {isSubmitting ? (
                     <span className="loading loading-spinner loading-sm"></span>
-                  ) : "Add"}
+                  ) : (
+                    "Add"
+                  )}
                 </button>
               )}
             </div>
@@ -701,7 +711,9 @@ const Students = () => {
               >
                 <option value="">Select Section</option>
                 {sections.map((section) => (
-                  <option key={section} value={section}>{section}</option>
+                  <option key={section} value={section}>
+                    {section}
+                  </option>
                 ))}
               </select>
               <input
@@ -723,8 +735,8 @@ const Students = () => {
             </div>
 
             <div className="flex justify-end gap-3 mt-5">
-              <button 
-                className="btn" 
+              <button
+                className="btn"
                 onClick={() => promotionModalRef.current.close()}
                 disabled={isPromoting}
               >

@@ -30,9 +30,19 @@ const Register = () => {
     }
 
     try {
-      const { data, error } = await supabase.from("Users").insert([
-        { name, grade_level, email, password, role, section, status: "Pending" },
-      ]);
+      const { data, error } = await supabase
+        .from("Users")
+        .insert([
+          {
+            name,
+            grade_level,
+            email,
+            password,
+            role,
+            section,
+            status: "Pending",
+          },
+        ]);
 
       if (error) {
         console.error("Error inserting data:", error);
@@ -122,7 +132,7 @@ const Register = () => {
           </div>
 
           <form className="mt-6" onSubmit={handleSubmit}>
-            <div className="mb-3">
+            <div className="mb-2">
               <label className="input validator w-full">
                 <input
                   type="text"
@@ -134,27 +144,26 @@ const Register = () => {
               </label>
             </div>
 
-            <div className="mb-3">
-            <label className="input validator w-full">
-              <select
-                value={grade_level}
-                onChange={(e) => setGradeLevel(e.target.value)}
-                required
-                className="w-full rounded"
-              >
-                <option value="">Select Grade Level</option>
-                <option value="Grade 1">Grade 1</option>
-                <option value="Grade 2">Grade 2</option>
-                <option value="Grade 3">Grade 3</option>
-                <option value="Grade 4">Grade 4</option>
-                <option value="Grade 5">Grade 5</option>
-                <option value="Grade 6">Grade 6</option>
-              </select>
-            </label>
-          </div>
+            <div className="mb-2">
+              <label className="input validator w-full">
+                <select
+                  value={grade_level}
+                  onChange={(e) => setGradeLevel(e.target.value)}
+                  required
+                  className="w-full rounded"
+                >
+                  <option value="">Select Grade Level</option>
+                  <option value="Grade 1">Grade 1</option>
+                  <option value="Grade 2">Grade 2</option>
+                  <option value="Grade 3">Grade 3</option>
+                  <option value="Grade 4">Grade 4</option>
+                  <option value="Grade 5">Grade 5</option>
+                  <option value="Grade 6">Grade 6</option>
+                </select>
+              </label>
+            </div>
 
-
-            <div className="mb-3">
+            <div className="mb-2">
               <label className="input validator w-full">
                 <input
                   type="text"
@@ -166,7 +175,7 @@ const Register = () => {
               </label>
             </div>
 
-            <div className="mb-3">
+            <div className="mb-2">
               <label className="input validator w-full">
                 <input
                   type="email"
@@ -181,7 +190,7 @@ const Register = () => {
               </div>
             </div>
 
-            <div className="mb-3">
+            <div className="mb-2">
               <label className="input validator w-full">
                 <input
                   type={showPassword ? "text" : "password"}
